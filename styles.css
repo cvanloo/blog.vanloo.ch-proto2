@@ -228,15 +228,11 @@ footer {
 	text-align: center;
 }
 
-p.eof {
+#eof {
 	width: 100%;
 	text-align: center;
-}
-
-p.eof::after {
-	content: 'STOP)))))';
-	display: block;
 	font-family: var(--fonts-code);
+	margin: 1em;
 }
 
 /*
