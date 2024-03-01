@@ -200,16 +200,23 @@ header {
 	padding: 2em;
 	margin: 0 auto;
 	max-width: var(--content-width);
-	white-space: nowrap;
 }
 
 header p.fill {
 	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
 }
 
-header code.keyword {
+header span.keywords {
+	display: flex;
+	flex: 1; /* fill up parent flex container */
+}
+
+header span.keywords code {
 	flex: 1;
 	text-align: end;
+	padding-left: 15px;
 }
 
 main {
