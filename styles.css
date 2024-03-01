@@ -153,6 +153,7 @@
 }
 
 :root {
+	--content-width: 60ch;
 	--text-size: 1em;
 	--fonts-text: "Atkinson Hyperlegible", sans-serif;
 	--fonts-code: "Berkeley Mono", monospace;
@@ -198,7 +199,8 @@ body {
 header {
 	padding: 2em;
 	margin: 0 auto;
-	max-width: 60ch;
+	max-width: var(--content-width);
+	white-space: nowrap;
 }
 
 header p.fill {
@@ -213,7 +215,7 @@ header code.keyword {
 main {
 	margin: 0 auto;
 	/*max-width: 80ch;*/
-	max-width: 60ch;
+	max-width: var(--content-width);
 	padding: 2em;
 }
 
@@ -224,7 +226,7 @@ article {
 
 footer {
 	margin: 0 auto;
-	max-width: 60ch;
+	max-width: var(--content-width);
 	text-align: center;
 }
 
