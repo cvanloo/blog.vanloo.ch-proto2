@@ -28,6 +28,9 @@
 		<meta name="og:description" content="150 words, 1-2 min"/>
 	</head>
 	<body>
+		<div class="scroll-progress">
+			<div id="scroll-progress"></div>
+		</div>
 		<header>
 			<nav>
 				<p class="fill">
@@ -98,7 +101,19 @@ Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit la
 		<footer>
 			<p id="eof">STOP)))))</p>
 			<!-- &#x1f12f; -->
-			<address>&#127279; 2024 <a href="mailto:webmaster@vanloo.ch">Colin van Loo</a></address>
+			<address>&#127279; 2024 <a href="mailto:janet -e &quot;(print (string/from-bytes ;(map (fn [c] (if (<= 97 c 122) (+ 97 (mod (+ c -97 13) 26)) c)) \&quot;jroznfgre@inaybb.pu\&quot;)))&quot;">Colin van Loo</a></address>
 		</footer>
+		<script>
+			function calculateProgress() {
+				const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+				const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+				const scrolled = (winScroll / height) * 100;
+				document.getElementById('scroll-progress').style.width = scrolled + "%";
+			}
+
+			window.onscroll = function() {
+				calculateProgress();
+			};
+		</script>
 	</body>
 </html>

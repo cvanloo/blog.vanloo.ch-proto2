@@ -161,17 +161,20 @@
 
 	--link-color: blue;
 	--text-color: black;
+	--accent-color: red;
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
 		--link-color: blue;
 		--text-color: black;
+		--accent-color: red;
 	}
 }
 
 html {
 	scroll-behavior: smooth;
+	scroll-padding-top: 10px;
 	font-size: clamp(1em, 1.3vw, 1.3em);
 }
 
@@ -235,6 +238,7 @@ footer {
 	margin: 0 auto;
 	max-width: var(--content-width);
 	text-align: center;
+	padding: 2em;
 }
 
 #eof {
@@ -242,6 +246,22 @@ footer {
 	text-align: center;
 	font-family: var(--fonts-code);
 	margin: 1em;
+}
+
+div.scroll-progress {
+	position: fixed;
+	z-index: 2;
+	margin: 0 auto;
+	padding: 0 2em;
+	max-width: var(--content-width);
+	left: 0;
+	right: 0;
+}
+
+#scroll-progress {
+	height: 2px;
+	background: var(--accent-color);
+	width: 0;
 }
 
 /*
