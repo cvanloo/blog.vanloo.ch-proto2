@@ -1,0 +1,348 @@
+@charset "UTF-8";
+
+/* @todo: include font licenses and link to them on the about page */
+
+@font-face {
+	font-family: "Helvetia";
+	src: url("/fonts/Helvetia/Helvetica Verbundene.ttf") format("truetype");
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("fonts/Atkinson/WOFF2/Atkinson-Hyperlegible-Regular-102a.woff2") format("woff2"),
+	     url("fonts/Atkinson/WOFF/Atkinson-Hyperlegible-Regular-102.woff") format("woff"),
+	     url("fonts/Atkinson/TTF/Atkinson-Hyperlegible-Regular-102.ttf") format("truetype"),
+	     url("fonts/Atkinson/SVG/Atkinson-Hyperlegible-Regular-102.svg") format("svg");
+	font-style: normal;
+	font-weight: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("fonts/Atkinson/WOFF2/Atkinson-Hyperlegible-Bold-102a.woff2") format("woff2"),
+	     url("fonts/Atkinson/WOFF/Atkinson-Hyperlegible-Bold-102.woff") format("woff"),
+	     url("fonts/Atkinson/TTF/Atkinson-Hyperlegible-Bold-102.ttf") format("truetype"),
+	     url("fonts/Atkinson/SVG/Atkinson-Hyperlegible-Bold-102.svg") format("svg");
+	font-weight: bold;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("fonts/Atkinson/WOFF2/Atkinson-Hyperlegible-Italic-102a.woff2") format("woff2"),
+	     url("fonts/Atkinson/WOFF/Atkinson-Hyperlegible-Italic-102.woff") format("woff"),
+	     url("fonts/Atkinson/TTF/Atkinson-Hyperlegible-Italic-102.ttf") format("truetype"),
+	     url("fonts/Atkinson/SVG/Atkinson-Hyperlegible-Italic-102.svg") format("svg");
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("fonts/Atkinson/WOFF2/Atkinson-Hyperlegible-Italic-102a.woff2") format("woff2"),
+	     url("fonts/Atkinson/WOFF/Atkinson-Hyperlegible-Italic-102.woff") format("woff"),
+	     url("fonts/Atkinson/TTF/Atkinson-Hyperlegible-Italic-102.ttf") format("truetype"),
+	     url("fonts/Atkinson/SVG/Atkinson-Hyperlegible-Italic-102.svg") format("svg");
+	font-style: oblique;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("fonts/Atkinson/WOFF2/Atkinson-Hyperlegible-BoldItalic-102a.woff2") format("woff2"),
+	     url("fonts/Atkinson/WOFF/Atkinson-Hyperlegible-BoldItalic-102.woff") format("woff"),
+	     url("fonts/Atkinson/TTF/Atkinson-Hyperlegible-BoldItalic-102.ttf") format("truetype"),
+	     url("fonts/Atkinson/SVG/Atkinson-Hyperlegible-BoldItalic-102.svg") format("svg");
+	font-weight: bold;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("fonts/Atkinson/WOFF2/Atkinson-Hyperlegible-BoldItalic-102a.woff2") format("woff2"),
+	     url("fonts/Atkinson/WOFF/Atkinson-Hyperlegible-BoldItalic-102.woff") format("woff"),
+	     url("fonts/Atkinson/TTF/Atkinson-Hyperlegible-BoldItalic-102.ttf") format("truetype"),
+	     url("fonts/Atkinson/SVG/Atkinson-Hyperlegible-BoldItalic-102.svg") format("svg");
+	font-weight: bold;
+	font-style: oblique;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono Variable";
+	src: url("fonts/berkeley-mono-variable/WEB/BerkeleyMonoVariable-Regular.woff2") format("woff2"),
+	     url("fonts/berkeley-mono-variable/WEB/BerkeleyMonoVariable-Regular.woff") format("woff"),
+	     url("fonts/berkeley-mono-variable/TTF/BerkeleyMonoVariable-Regular.ttf") format("truetype");
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono Variable";
+	src: url("fonts/berkeley-mono-variable/WEB/BerkeleyMonoVariable-Italic.woff2") format("woff2"),
+	     url("fonts/berkeley-mono-variable/WEB/BerkeleyMonoVariable-Italic.woff") format("woff"),
+	     url("fonts/berkeley-mono-variable/TTF/BerkeleyMonoVariable-Italic.ttf") format("truetype");
+	     font-style: italic;
+	     font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono Variable";
+	src: url("fonts/berkeley-mono-variable/WEB/BerkeleyMonoVariable-Italic.woff2") format("woff2"),
+	     url("fonts/berkeley-mono-variable/WEB/BerkeleyMonoVariable-Italic.woff") format("woff"),
+	     url("fonts/berkeley-mono-variable/TTF/BerkeleyMonoVariable-Italic.ttf") format("truetype");
+	     font-style: oblique;
+	     font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono";
+	src: url("fonts/berkeley-mono/WEB/BerkeleyMono-Regular.woff2") format("woff2"),
+	     url("fonts/berkeley-mono/WEB/BerkeleyMono-Regular.woff") format("woff"),
+	     url("fonts/berkeley-mono/TTF/BerkeleyMono-Regular.ttf") format("truetype");
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono";
+	src: url("fonts/berkeley-mono/WEB/BerkeleyMono-Bold.woff2") format("woff2"),
+	     url("fonts/berkeley-mono/WEB/BerkeleyMono-Bold.woff") format("woff"),
+	     url("fonts/berkeley-mono/TTF/BerkeleyMono-Bold.ttf") format("truetype");
+	font-weight: bold;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono";
+	src: url("fonts/berkeley-mono/WEB/BerkeleyMono-Italic.woff2") format("woff2"),
+	     url("fonts/berkeley-mono/WEB/BerkeleyMono-Italic.woff") format("woff"),
+	     url("fonts/berkeley-mono/TTF/BerkeleyMono-Italic.ttf") format("truetype");
+        font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono";
+	src: url("fonts/berkeley-mono/WEB/BerkeleyMono-Italic.woff2") format("woff2"),
+	     url("fonts/berkeley-mono/WEB/BerkeleyMono-Italic.woff") format("woff"),
+	     url("fonts/berkeley-mono/TTF/BerkeleyMono-Italic.ttf") format("truetype");
+        font-style: oblique;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono";
+	src: url("fonts/berkeley-mono/WEB/BerkeleyMono-BoldItalic.woff2") format("woff2"),
+	     url("fonts/berkeley-mono/WEB/BerkeleyMono-BoldItalic.woff") format("woff"),
+	     url("fonts/berkeley-mono/TTF/BerkeleyMono-BoldItalic.ttf") format("truetype");
+	font-weight: bold;
+        font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Berkeley Mono";
+	src: url("fonts/berkeley-mono/WEB/BerkeleyMono-BoldItalic.woff2") format("woff2"),
+	     url("fonts/berkeley-mono/WEB/BerkeleyMono-BoldItalic.woff") format("woff"),
+	     url("fonts/berkeley-mono/TTF/BerkeleyMono-BoldItalic.ttf") format("truetype");
+	font-weight: bold;
+        font-style: oblique;
+	font-display: swap;
+}
+
+:root {
+	--link-color: blue;
+	--text-size: 1em;
+	--text-color: black;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--link-color: blue;
+		--text-color: black;
+	}
+}
+
+html {
+	scroll-behavior: smooth;
+	font-size: clamp(1em, 1.3vw, 1.3em);
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+blockquote,
+code,
+ul,
+ol,
+dl,
+dd,
+img {
+    margin: 0;
+}
+
+body {
+	line-height: 1.4;
+	font-family: "Atkinson Hyperlegible";
+}
+
+main {
+	margin: 0 auto;
+	max-width: 80ch;
+	padding: 2em;
+}
+
+article {
+	position: relative;
+	max-width: 60ch;
+}
+
+/*
+ * Code block
+ */
+
+pre {
+	white-space: pre-wrap;
+}
+
+code {
+	font-family: "Berkeley Mono", monospace;
+	/* white-space: pre; */
+	line-height: 1.5;
+}
+
+code span.line-number {
+	counter-increment: line;
+	text-align: left;
+	float: left;
+	clear: left;
+	width: 100%;
+	border-top: 1px solid #EFEFEF;
+}
+
+code span.line-number:last-child {
+	border-bottom: 1px solid #EFEFEF;
+}
+
+code span.line-number::before {
+	content: counter(line) ' ';
+	float: left;
+	margin-left: auto;
+	text-align: right;
+	width: 6ch;
+	border-right: 1px solid #EFEFEF;
+}
+
+code span.line-number::after {
+	content: '  ';
+	float: right;
+	width: 6ch;
+	border-left: 1px solid #EFEFEF;
+}
+
+@media screen and (min-width: 600px) {
+	code span.comment {
+		display: inline-block;
+		width: 50%;
+		text-align: right;
+	}
+}
+
+/*
+ * Side note
+ * Taken @from: https://github.com/kslstn/sidenotes/tree/main (GPL-2.0)
+ */
+
+.sidenote {
+	display: inline;
+}
+
+.sidenote__button::after {
+	content: "*";
+	display: inline-block;
+}
+
+.sidenote__checkbox {
+	display: none;
+}
+
+/* invisible (off screen) but available to screen readers */
+.sidenote__content-parenthesis {
+	position: absolute;
+	left: -99999px;
+	top: auto;
+}
+
+@media screen and (max-width: 1079px) {
+	.sidenote__checkbox~.sidenote__content {
+		position: absolute;
+		left: -99999px;
+		top: auto;
+	}
+
+	.sidenote__checkbox:checked~.sidenote__content {
+		position: relative;
+		left: auto;
+		float: left;
+		min-width: 100%;
+		display: block;
+		margin: 0.8rem 0;
+		padding: 0.8rem 1.6rem;
+	}
+
+	.sidenote__button {
+		color: var(--link-color);
+		text-decoration: underline;
+		text-decoration-style: dotted;
+		cursor: pointer;
+	}
+
+	.sidenote__button:not(:hover):focus::after {
+		display: inline;
+	}
+
+	.sidenote__checkbox:checked~.sidenote__button::after {
+		content: none;
+	}
+}
+
+@media screen and (min-width: 1080px) {
+	.sidenote {
+		--sidenote-width: 12rem;
+		--sidenote-margin: 4.8rem;
+		cursor: default;
+	}
+
+	.sidenote:hover .sidenote__button::after,
+	.sidenote:hover .sidenote__content::before {
+		color: var(--link-color);
+	}
+
+	.sidenote__content::before {
+		content: "*";
+		display: flex;
+		align-items: flex-start;
+		justify-content: flex-end;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: -4rem;
+		width: 3rem;
+	}
+
+	.sidenote__content {
+		display: block;
+		position: absolute;
+		right: 0;
+		margin-top: calc(-1.5*var(--text-size));
+		margin-right: calc(-1*var(--sidenote-width) - 1*var(--sidenote-margin));
+		width: var(--sidenote-width);
+		font-size: var(--text-size);
+		color: var(--text-color);
+	}
+}
