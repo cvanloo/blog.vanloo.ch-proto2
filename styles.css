@@ -153,8 +153,12 @@
 }
 
 :root {
-	--link-color: blue;
 	--text-size: 1em;
+	--fonts-text: "Atkinson Hyperlegible", sans-serif;
+	--fonts-code: "Berkeley Mono", monospace;
+	--fonts-note: "Helvetia", serif;
+
+	--link-color: blue;
 	--text-color: black;
 }
 
@@ -188,7 +192,7 @@ img {
 
 body {
 	line-height: 1.4;
-	font-family: "Atkinson Hyperlegible";
+	font-family: var(--fonts-text);
 }
 
 header {
@@ -232,6 +236,7 @@ p.eof {
 p.eof::after {
 	content: 'STOP)))))';
 	display: block;
+	font-family: var(--fonts-code);
 }
 
 /*
@@ -243,7 +248,7 @@ pre {
 }
 
 code {
-	font-family: "Berkeley Mono", monospace;
+	font-family: var(--fonts-code);
 	/* white-space: pre; */
 	line-height: 1.5;
 }
