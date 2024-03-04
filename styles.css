@@ -152,6 +152,9 @@
 	font-display: swap;
 }
 
+/* @todo: include font for Shavian */
+/* @todo: make sure to include font for all the special chars, like the external link one */
+
 :root {
 	--content-width: 60ch;
 	--text-size: 1em;
@@ -163,11 +166,17 @@
 	--link-color-visited: #8A6EDD;
 	--accent-color: #DD6EC2;
 
-	--color-bg: #0A0A0A;
-	--color-fg: #B8B9B4;
-	--color-title: #D1D1CB;
+	/* @todo: light scheme colors */
+	/* @todo: text highlight colors */
+	/* @todo: xcode colors for code block */
+	/* @todo: different color schemes via alternate stylesheets ? */
+	--color-bg: #B8B9B4;
+	--color-fg: #0A0A0A;
+	--color-title: black;
 	--color-code-lines: #2E2E2C;
 	--color-sidenote-fg: #585858;
+	--color-selection-fg: #FFF;
+	--color-selection-bg: #000;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -176,12 +185,16 @@
 		--link-color-visited: #8A6EDD;
 		--accent-color: #DD6EC2;
 
+		/* @todo: good colors */
+		/* @todo: text highlight colors */
 		/* Simple Dark (github.com/tek256/simple-dark) */
 		--color-bg: #0A0A0A;
 		--color-fg: #B8B9B4;
 		--color-title: #D1D1CB;
 		--color-code-lines: #2E2E2C;
 		--color-sidenote-fg: #585858;
+		--color-selection-fg: var(--color-bg);
+		--color-selection-bg: #FFF;
 	}
 }
 
@@ -189,6 +202,11 @@ html {
 	scroll-behavior: smooth;
 	scroll-padding-top: 10px;
 	font-size: clamp(1em, 1.3vw, 1.3em);
+}
+
+::selection {
+	color: var(--color-selection-fg);
+	background-color: var(--color-selection-bg);
 }
 
 a {
@@ -259,6 +277,7 @@ body {
 
 header {
 	padding: 2em;
+	padding-bottom: 0;
 	margin: 0 auto;
 	max-width: var(--content-width);
 }
@@ -314,6 +333,37 @@ main {
 	/*max-width: 80ch;*/
 	max-width: var(--content-width);
 	padding: 2em;
+}
+
+@media screen and (max-width: 1079px) {
+	main, header, footer {
+		padding: 1em;
+	}
+}
+
+div.content-info {
+	display: flex;
+}
+
+div.content-info p {
+	margin: 0 0.4em;
+	padding: 0.4em;
+}
+
+div.taglist {
+	display: flex;
+}
+
+div.taglist p {
+	margin: 0 0.4em;
+	padding: 0.4em;
+	background-color: red;
+	border: 1px red solid;
+	border-radius: 15px;
+}
+
+div.taglist p:first-child {
+	margin-left: 0;
 }
 
 article {
