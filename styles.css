@@ -166,17 +166,32 @@
 	--link-color-visited: #8A6EDD;
 	--accent-color: #DD6EC2;
 
+	/* Fogbell Light (github.com/jaredgorski/fogbell.vim) */
+	--fb-voidBlack: #121212;
+	--fb-voidBlack2: #262626;
+	--fb-voidGray1: #3E3D32;
+	--fb-voidGray2: #49483E;
+	--fb-voidGray3: #6B6B6B;
+	--fb-voidGray4: #B0B0B0;
+	--fb-voidSteel: #D0D0D0;
+	--fb-voidBlue: #699B9B;
+	--fb-voidGreen: #569F7A;
+	--fb-voidGold: #8E700B;
+	--fb-voidRed: #821A1A;
+	--fb-voidRed2: #FF0000;
+
 	/* @todo: light scheme colors */
 	/* @todo: text highlight colors */
 	/* @todo: xcode colors for code block */
 	/* @todo: different color schemes via alternate stylesheets ? */
-	--color-bg: #B8B9B4;
-	--color-fg: #0A0A0A;
+	--color-bg: var(--fb-voidSteel);
+	--color-fg: var(--fb-voidBlack);
 	--color-title: black;
-	--color-code-lines: #2E2E2C;
-	--color-sidenote-fg: #585858;
-	--color-selection-fg: #FFF;
-	--color-selection-bg: #000;
+	--color-code-lines: var(--fb-voidGray4);
+	--color-sidenote-fg: var(--fb-voidBlack2);
+	--color-selection-fg: var(--fb-voidBlack);
+	--color-selection-bg: var(--fb-voidGreen);
+	--color-tag-p-fg: var(--link-color);
 }
 
 @media (prefers-color-scheme: dark) {
