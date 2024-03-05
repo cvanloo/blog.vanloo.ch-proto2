@@ -285,6 +285,7 @@ body {
 
 h1 {
 	font-size: 2.5em;
+	color: var(--color-title);
 }
 
 div.title h1 {
@@ -388,24 +389,24 @@ main {
 	}
 }
 
-div.content-info {
+aside.content-info {
 	display: flex;
 	flex-direction: column;
 }
 
-div.content-info p {
+aside.content-info p {
 	margin: 0 0.4em;
 }
 
-div.content-info p:first-child {
+aside.content-info p:first-child {
 	margin-left: 0;
 }
 
-div.content-info p:last-child {
+aside.content-info p:last-child {
 	margin-left: 0;
 }
 
-div.content-info div.info {
+aside.content-info div.info {
 	display: flex;
 }
 
