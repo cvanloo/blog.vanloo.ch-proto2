@@ -187,14 +187,40 @@
 
 		/* @todo: good colors */
 		/* @todo: text highlight colors */
+
 		/* Simple Dark (github.com/tek256/simple-dark) */
-		--color-bg: #0A0A0A;
-		--color-fg: #B8B9B4;
-		--color-title: #D1D1CB;
-		--color-code-lines: #2E2E2C;
+		/* copied from the kitty.conf */
+		--sd-background: #0A0A0A;
+		--sd-foreground: #B8B9B4;
+		--sd-color0: #0A0A0A;
+		--sd-color8: #2E2E2C;
+		--sd-color1: #939490;
+		--sd-color9: #989995;
+		--sd-color2: #5E5E5C;
+		--sd-color10: #636361;
+		--sd-color3: #B6B8B3;
+		--sd-color11: #BBBDB8;
+		--sd-color4: #727370;
+		--sd-color12: #777875;
+		--sd-color5: #D1D1CB;
+		--sd-color13: #D6D6D0;
+		--sd-color6: #636361;
+		--sd-color14: #696966;
+		--sd-color7: #AAABA6;
+		--sd-color15: #AFB0AB;
+
+		/* html colors */
+		--color-bg: var(--sd-background);
+		--color-fg: var(--sd-foreground);
+		--color-title: var(--sd-color5);
+		--color-code-lines: var(--sd-color8);
+
 		--color-sidenote-fg: #585858;
+
 		--color-selection-fg: var(--color-bg);
-		--color-selection-bg: #FFF;
+		--color-selection-bg: white;
+
+		--color-tag-p-fg: var(--link-color);
 	}
 }
 
@@ -259,6 +285,10 @@ body {
 
 h1 {
 	font-size: 2.5em;
+}
+
+div.title h1 {
+	margin: 0;
 }
 
 h1 a, h2 a, h3 a {
@@ -343,27 +373,71 @@ main {
 
 div.content-info {
 	display: flex;
+	flex-direction: column;
 }
 
 div.content-info p {
 	margin: 0 0.4em;
-	padding: 0.4em;
+}
+
+div.content-info p:first-child {
+	margin-left: 0;
+}
+
+div.content-info p:last-child {
+	margin-left: 0;
+}
+
+div.content-info div.info {
+	display: flex;
 }
 
 div.taglist {
+	margin-top: 0.4em;
 	display: flex;
 }
 
 div.taglist p {
+	font-weight: bold;
 	margin: 0 0.4em;
-	padding: 0.4em;
-	background-color: red;
-	border: 1px red solid;
-	border-radius: 15px;
+	color: var(--color-tag-p-fg);
 }
 
 div.taglist p:first-child {
 	margin-left: 0;
+}
+
+div.taglist p:last-child {
+	margin-right: 0;
+}
+
+div.taglist p a {
+	text-decoration: none;
+	position: relative;
+	padding: 0.3em;
+}
+
+div.taglist p a::before {
+	content: '';
+	background-color: white;
+	position: absolute;
+	left: 0;
+	bottom: 3px;
+	width: 100%;
+	height: 4px;
+	z-index: -1;
+	transition: all .3s ease-in-out;
+}
+
+div.taglist p a:hover::before {
+	bottom: 0;
+	height: 100%;
+	background-color: var(--accent-color);
+}
+
+div.taglist p a:hover {
+	color: white;
+	transition: all .3s ease-in-out;
 }
 
 article {
