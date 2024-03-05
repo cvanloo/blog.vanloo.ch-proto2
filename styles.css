@@ -300,6 +300,23 @@ h1 a:visited, h2 a:visited, h3 a:visited {
 	color: var(--color-title);
 }
 
+h1::before, h2::before, h3::before {
+	content: "\00B6";
+	font-size: 0.9em;
+	opacity: 0.5;
+	position: absolute;
+	left: -2rem;
+	visibility: hidden;
+}
+
+h1:hover::before, h2:hover::before, h3:hover::before {
+	visibility: visible;
+}
+
+section:target > h1::before, section:target > h2::before, section:target > h3::before {
+	visibility: visible;
+}
+
 body {
 	line-height: 1.4;
 	font-family: var(--fonts-text);
@@ -414,7 +431,7 @@ div.taglist p:last-child {
 div.taglist p a {
 	text-decoration: none;
 	position: relative;
-	padding: 0.3em;
+	/*padding: 0.3em;*/
 }
 
 div.taglist p a::before {
@@ -424,7 +441,8 @@ div.taglist p a::before {
 	left: 0;
 	bottom: 3px;
 	width: 100%;
-	height: 4px;
+	/*height: 4px;*/
+	height: 0px;
 	z-index: -1;
 	transition: all .3s ease-in-out;
 }
