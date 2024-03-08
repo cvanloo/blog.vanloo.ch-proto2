@@ -730,3 +730,7 @@ div.blog-entry {
 	padding: 0 .6em 1em .6em;
 	margin: 2em 0;
 }
+
+div.blog-entry h2 {
+	margin-bottom: 0;
+}
