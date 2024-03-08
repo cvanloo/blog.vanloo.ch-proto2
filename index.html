@@ -3,12 +3,73 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="styles.css" title="Default Style" />
+		<link rel="icon" type="image/png" href="favicon.png" />
+		<link rel="canonical" href="https://blog.vanloo.ch/" />
 	</head>
 	<body>
-		<h1>(save-lisp-and-die)</h1>
-		<!-- @todo: filter by tags (one or multiple tags) -->
-		<!-- @todo: search -->
-		<!-- @todo: display pinned posts -->
-		<!-- @todo: display posts (most recent first) -->
+		<header>
+			<nav>
+				<p class="fill">
+				<!-- 2^7633587786 -->
+				<code>(save-lisp-and-die</code>
+				<span class="keywords">
+					<code><a href="/index.html">:home</a></code>
+					<code><a href="/about.html">:about</a></code>
+					<code><a href="">:rss</a></code>
+				</span>
+				<code>)</code>
+				</p>
+			</nav>
+		</header>
+		<main>
+			<h1>(save-lisp-and-die)</h1>
+			<!-- @todo: filter by tags (one or multiple tags) -->
+			<!-- @todo: search -->
+			<!-- @todo: Welcome... {{what this blog is about}} -->
+			<!-- @todo: display pinned posts -->
+			<!-- @todo: display posts (most recent first) -->
+			<div class="blog-entry">
+				<h2><a href="entry.html">Example Entry Page</a></h2>
+				<p>
+				Short summary. What this post is about. Needs to be captivating.
+				The reader should want to click on and read all &mdash; ALL! &mdash; of these posts.
+				</p>
+				<div class="taglist">
+					<p><a href="/search?tags=tag1">:tag1</a></p>
+					<p><a href="/search?tags=example">:example</a></p>
+					<p><a href="/search?tags=tag3">:tag3</a></p>
+				</div>
+			</div>
+			<div class="blog-entry">
+				<h2><a href="entry.html">Some other blog post</a></h2>
+				<p>
+				Short summary. What this post is about. Needs to be captivating.
+				The reader should want to click on and read all &mdash; ALL! &mdash; of these posts.
+				</p>
+				<div class="taglist">
+					<p><a href="/search?tags=tag1">:tag1</a></p>
+					<p><a href="/search?tags=example">:example</a></p>
+					<p><a href="/search?tags=tag3">:tag3</a></p>
+					<p><a href="/search?tags=tag4">:tag4</a></p>
+				</div>
+			</div>
+			<div class="blog-entry">
+				<h2><a href="entry.html">And yet another one!</a></h2>
+				<p>
+				Short summary. What this post is about. Needs to be captivating.
+				The reader should want to click on and read all &mdash; ALL! &mdash; of these posts.
+				</p>
+				<div class="taglist">
+					<p><a href="/search?tags=tag3">:tag3</a></p>
+					<p><a href="/search?tags=tag4">:tag4</a></p>
+				</div>
+			</div>
+		</main>
+		<footer>
+			<p id="eof">STOP)))))</p>
+			<!-- &#x1f12f; -->
+			<address>&#127279; 2024 <a href="mailto:janet -e &quot;(print (string/from-bytes ;(map (fn [c] (if (<= 97 c 122) (+ 97 (mod (+ c -97 13) 26)) c)) \&quot;pbagnpg@inaybb.pu\&quot;)))&quot;">Colin van Loo</a></address>
+		</footer>
 	</body>
 </html>
