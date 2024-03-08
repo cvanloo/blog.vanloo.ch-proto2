@@ -735,6 +735,11 @@ div.blog-entry h2 {
 	margin-bottom: 0;
 }
 
+/* @fixme: ugly, maybe use a class where we want to have this set? */
+div.blog-entry h2::before {
+	content: none;
+}
+
 .pinned {
 	position: relative;
 }
