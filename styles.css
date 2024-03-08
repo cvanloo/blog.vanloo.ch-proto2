@@ -164,7 +164,7 @@
 
 	--link-color: #DD6EC2;
 	--link-color-visited: #8A6EDD;
-	--accent-color: #DD6EC2;
+	--accent-color: var(--fb-voidGreen);
 
 	/* Fogbell Light (github.com/jaredgorski/fogbell.vim) */
 	--fb-voidBlack: #121212;
@@ -430,6 +430,10 @@ div.taglist p::after {
 	font-size: 0.6em;
 	bottom: 0.8em;
 	visibility: hidden;
+}
+
+div.taglist p a {
+	color: var(--color-tag-p-fg);
 }
 
 div.taglist p:hover::after {
