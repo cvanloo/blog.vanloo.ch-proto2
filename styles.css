@@ -1,7 +1,5 @@
 @charset "UTF-8";
 
-/* @todo: include font licenses and link to them on the about page */
-
 @font-face {
 	font-family: "Helvetia";
 	src: url("/fonts/Helvetia/Helvetica Verbundene.ttf") format("truetype");
@@ -201,9 +199,6 @@
 	font-display: swap;
 }
 
-/* @todo: include font for Shavian */
-/* @todo: make sure to include font for all the special chars, like the external link one */
-
 :root {
 	--content-width: 60ch;
 	--text-size: 1em;
@@ -252,8 +247,6 @@
 		--link-color: #DD6EC2;
 		--link-color-visited: #8A6EDD;
 		--accent-color: #DD6EC2;
-
-		/* @todo: good colors */
 
 		/* Simple Dark (github.com/tek256/simple-dark) */
 		/* copied from the kitty.conf */
@@ -321,7 +314,7 @@ a[target=_blank] {
 
 a[target=_blank]::after {
 	position: absolute;
-	content: "◹";
+	content: "↗";
 	font-size: 0.6em;
 	bottom: 0.6em;
 }
@@ -475,7 +468,7 @@ div.taglist p {
 
 div.taglist p::after {
 	position: absolute;
-	content: "◹";
+	content: "↗";
 	font-size: 0.6em;
 	bottom: 0.8em;
 	visibility: hidden;
