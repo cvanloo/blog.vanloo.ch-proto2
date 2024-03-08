@@ -152,13 +152,62 @@
 	font-display: swap;
 }
 
+@font-face {
+	font-family: "Inter Alia";
+	src: url("fonts/interalia/WOFF2/InterAlia-Regular.woff2") format("woff2"),
+	     url("fonts/interalia/TTF/InterAlia-Regular.ttf") format("truetype");
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Inter Alia";
+	src: url("fonts/interalia/WOFF2/InterAlia-Italic.woff2") format("woff2"),
+	     url("fonts/interalia/TTF/InterAlia-Italic.ttf") format("truetype");
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Inter Alia";
+	src: url("fonts/interalia/WOFF2/InterAlia-Italic.woff2") format("woff2"),
+	     url("fonts/interalia/TTF/InterAlia-Italic.ttf") format("truetype");
+	font-style: oblique;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Inter Alia";
+	src: url("fonts/interalia/WOFF2/InterAlia-Bold.woff2") format("woff2"),
+	     url("fonts/interalia/TTF/InterAlia-Bold.ttf") format("truetype");
+	font-weight: bold;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Inter Alia";
+	src: url("fonts/interalia/WOFF2/InterAlia-BoldItalic.woff2") format("woff2"),
+	     url("fonts/interalia/TTF/InterAlia-BoldItalic.ttf") format("truetype");
+	font-weight: bold;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Inter Alia";
+	src: url("fonts/interalia/WOFF2/InterAlia-BoldItalic.woff2") format("woff2"),
+	     url("fonts/interalia/TTF/InterAlia-BoldItalic.ttf") format("truetype");
+	font-weight: bold;
+	font-style: oblique;
+	font-display: swap;
+}
+
 /* @todo: include font for Shavian */
 /* @todo: make sure to include font for all the special chars, like the external link one */
 
 :root {
 	--content-width: 60ch;
 	--text-size: 1em;
-	--fonts-text: "Atkinson Hyperlegible", sans-serif;
+	--fonts-text: "Atkinson Hyperlegible", "Inter Alia", sans-serif;
 	--fonts-code: "Berkeley Mono", monospace;
 	--fonts-note: "Helvetia", serif;
 
