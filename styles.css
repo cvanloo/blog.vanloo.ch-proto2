@@ -180,18 +180,20 @@
 	--fb-voidRed: #821A1A;
 	--fb-voidRed2: #FF0000;
 
-	/* @todo: light scheme colors */
-	/* @todo: text highlight colors */
 	/* @todo: xcode colors for code block */
 	/* @todo: different color schemes via alternate stylesheets ? */
 	--color-bg: var(--fb-voidSteel);
 	--color-fg: var(--fb-voidBlack);
-	--color-title: black;
+	--color-title: var(--fb-voidBlack);
+	--color-section: var(--fb-voidBlack2);
 	--color-code-lines: var(--fb-voidGray4);
+
 	--color-sidenote-fg: var(--fb-voidBlack2);
+
 	--color-selection-fg: var(--fb-voidBlack);
-	--color-selection-bg: var(--fb-voidGreen);
-	--color-tag-p-fg: var(--link-color);
+	--color-selection-bg: var(--fb-voidGray4);
+
+	--color-tag-p-fg: var(--fb-voidGreen);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -201,7 +203,6 @@
 		--accent-color: #DD6EC2;
 
 		/* @todo: good colors */
-		/* @todo: text highlight colors */
 
 		/* Simple Dark (github.com/tek256/simple-dark) */
 		/* copied from the kitty.conf */
@@ -227,7 +228,8 @@
 		/* html colors */
 		--color-bg: var(--sd-background);
 		--color-fg: var(--sd-foreground);
-		--color-title: var(--sd-color5);
+		--color-title: var(--sd-color13);
+		--color-section: var(--sd-color5);
 		--color-code-lines: var(--sd-color8);
 
 		--color-sidenote-fg: #585858;
@@ -307,16 +309,16 @@ div.title h1 {
 	margin: 0;
 }
 
-h1 a, h2 a, h3 a {
-	color: var(--color-title);
+h2 a, h3 a {
+	color: var(--color-section);
 	text-decoration: none;
 }
 
-h1 a:visited, h2 a:visited, h3 a:visited {
-	color: var(--color-title);
+h2 a:visited, h3 a:visited {
+	color: var(--color-section);
 }
 
-h1::before, h2::before, h3::before {
+h2::before, h3::before {
 	content: "\00B6";
 	font-size: 0.9em;
 	opacity: 0.5;
@@ -325,11 +327,11 @@ h1::before, h2::before, h3::before {
 	visibility: hidden;
 }
 
-h1:hover::before, h2:hover::before, h3:hover::before {
+h2:hover::before, h3:hover::before {
 	visibility: visible;
 }
 
-section:target > h1::before, section:target > h2::before, section:target > h3::before {
+section:target > h2::before, section:target > h3::before {
 	visibility: visible;
 }
 
