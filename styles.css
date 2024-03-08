@@ -188,6 +188,8 @@
 	--color-section: var(--fb-voidBlack2);
 	--color-code-lines: var(--fb-voidGray4);
 
+	--color-keyword-fg: var(--fb-voidGreen);
+
 	--color-sidenote-fg: var(--fb-voidBlack2);
 
 	--color-selection-fg: var(--fb-voidBlack);
@@ -231,6 +233,8 @@
 		--color-title: var(--sd-color13);
 		--color-section: var(--sd-color5);
 		--color-code-lines: var(--sd-color8);
+
+		--color-keyword-fg: var(--link-color);
 
 		--color-sidenote-fg: #585858;
 
@@ -365,32 +369,13 @@ header span.keywords code {
 }
 
 header span.keywords code a {
-	color: var(--color-fg);
+	color: var(--color-keyword-fg);
 	text-decoration: none;
 	position: relative;
 }
 
-header span.keywords code a::before {
-	content: '';
-	background-color: var(--color-sidenote-fg);
-	position: absolute;
-	left: 0;
-	bottom: 3px;
-	width: 100%;
-	height: 4px;
-	z-index: -1;
-	transition: all .3s ease-in-out;
-}
-
-header span.keywords code a:hover::before {
-	bottom: 0;
-	height: 100%;
-	background-color: white;
-}
-
 header span.keywords code a:hover {
-	color: var(--color-bg);
-	transition: all .3s ease-in-out;
+	font-weight: bold;
 }
 
 main {
@@ -436,44 +421,35 @@ div.taglist p {
 	font-weight: bold;
 	margin: 0 0.4em;
 	color: var(--color-tag-p-fg);
+	position: relative;
+}
+
+div.taglist p::after {
+	position: absolute;
+	content: "◹";
+	font-size: 0.6em;
+	bottom: 0.8em;
+	visibility: hidden;
+}
+
+div.taglist p:hover::after {
+	visibility: visible;
 }
 
 div.taglist p:first-child {
 	margin-left: 0;
+	margin-right: 0.4em;
 }
 
 div.taglist p:last-child {
 	margin-right: 0;
+	margin-left: 0.4em;
 }
 
 div.taglist p a {
 	text-decoration: none;
 	position: relative;
 	/*padding: 0.3em;*/
-}
-
-div.taglist p a::before {
-	content: '';
-	background-color: white;
-	position: absolute;
-	left: 0;
-	bottom: 3px;
-	width: 100%;
-	/*height: 4px;*/
-	height: 0px;
-	z-index: -1;
-	transition: all .3s ease-in-out;
-}
-
-div.taglist p a:hover::before {
-	bottom: 0;
-	height: 100%;
-	background-color: var(--accent-color);
-}
-
-div.taglist p a:hover {
-	color: white;
-	transition: all .3s ease-in-out;
 }
 
 article {
