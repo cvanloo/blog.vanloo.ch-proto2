@@ -240,6 +240,8 @@
 	--color-selection-bg: var(--fb-voidGray4);
 
 	--color-tag-p-fg: var(--fb-voidGreen);
+	--color-be-border: var(--fb-voidBlue);
+	--color-be-shadow: var(--fb-voidGray4);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -284,6 +286,8 @@
 		--color-selection-bg: white;
 
 		--color-tag-p-fg: var(--link-color);
+		--color-be-border: var(--sd-color6);
+		--color-be-shadow: var(--sd-color8);
 	}
 }
 
@@ -712,4 +716,17 @@ code span.line-number::after {
 #wanted-for {
 	text-align: center;
 	text-transform: uppercase;
+}
+
+/*
+ * Entry listing
+ */
+
+div.blog-entry {
+	border: 3px solid var(--color-be-border);
+	border-radius: 15px;
+	box-shadow: 12px 10px 2px 1px var(--color-be-shadow);
+	padding: .4em 1em;
+	padding: 0 .6em 1em .6em;
+	margin: 2em 0;
 }
