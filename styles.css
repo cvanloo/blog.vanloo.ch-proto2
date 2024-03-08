@@ -734,3 +734,39 @@ div.blog-entry {
 div.blog-entry h2 {
 	margin-bottom: 0;
 }
+
+.pinned {
+	position: relative;
+}
+
+.pinned::after {
+	content: '📌';
+	position: absolute;
+	top: 0;
+	right: 0;
+	padding: 1em;
+}
+
+hr {
+	width: 90%;
+}
+
+p.blog-entry-section-note {
+	font-family: var(--fonts-note);
+	margin-top: 2rem;
+	text-align: center;
+}
+
+@media screen and (min-width: 1080px) {
+	p.blog-entry-section-note {
+		--sidenote-width: 12rem;
+		--sidenote-margin: 4.8rem;
+		display: block;
+		width: var(--sidenote-width);
+		font-family: var(--fonts-note);
+		position: absolute;
+		margin-top: 1rem;
+		margin-left: calc(-1*var(--sidenote-width) - 1*var(--sidenote-margin));
+		text-align: right;
+	}
+}
