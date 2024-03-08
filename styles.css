@@ -696,3 +696,20 @@ code span.line-number::after {
 		font-family: var(--fonts-note);
 	}
 }
+
+/*
+ * About WANTED
+ */
+
+#wanted-header {
+	text-align: center;
+	font-size: 5rem;
+	margin: 0;
+	text-transform: uppercase;
+	letter-spacing: .8rem;
+}
+
+#wanted-for {
+	text-align: center;
+	text-transform: uppercase;
+}
