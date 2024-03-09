@@ -506,6 +506,15 @@ footer {
 	padding: 2em;
 }
 
+footer span.credits {
+	margin-top: .4em;
+	display: flex;
+}
+
+footer span.credits a {
+	flex-grow: 1;
+}
+
 #eof {
 	width: 100%;
 	text-align: center;
