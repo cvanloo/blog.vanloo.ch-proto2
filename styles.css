@@ -603,6 +603,9 @@ ul.language-selection li ul li:last-child {
 
 #search {
 	width: 100%;
+	width: -moz-available;
+	width: -webkit-fill-available;
+	/*width: fill-available;*/
 	padding: .4rem;
 	background: var(--color-bg);
 	color: var(--color-fg);
