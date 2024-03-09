@@ -601,6 +601,15 @@ ul.language-selection li ul li:last-child {
 	border-bottom: none;
 }
 
+#search {
+	width: 100%;
+	padding: .4rem;
+	background: var(--color-bg);
+	color: var(--color-fg);
+	font-size: 1rem;
+	border: 1px solid var(--color-be-border);
+}
+
 /*
  * Code block
  */
