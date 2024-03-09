@@ -242,6 +242,8 @@
 	--color-tag-p-fg: var(--fb-voidGreen);
 	--color-be-border: var(--fb-voidBlue);
 	--color-be-shadow: var(--fb-voidGray4);
+
+	--color-lang-sel-bg: var(--fb-voidGray4);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -288,6 +290,8 @@
 		--color-tag-p-fg: var(--link-color);
 		--color-be-border: var(--sd-color6);
 		--color-be-shadow: var(--sd-color8);
+
+		--color-lang-sel-bg: var(--sd-color8);
 	}
 }
 
@@ -546,6 +550,55 @@ address a {
 	text-decoration: underline;
 	text-decoration-style: dotted;
 	color: var(--color-fg);
+}
+
+ul.language-selection {
+	padding: 0;
+	width: fit-content;
+	background-color: var(--color-lang-sel-bg);
+	padding: .6rem;
+}
+
+ul.language-selection li ul {
+	background-color: var(--color-lang-sel-bg);
+}
+
+ul.language-selection li {
+	display: block;
+	transition-duration: .5s;
+}
+
+ul.language-selection li:hover {
+	cursor: pointer;
+}
+
+ul.language-selection li ul {
+	visibility: hidden;
+	opacity: 0;
+	position: absolute;
+	transition: all 0.5s ease;
+	left: 0;
+	display: none;
+	padding: 0;
+}
+
+ul.language-selection li:hover > ul,
+ul.language-selection li:focus-within > ul,
+ul.language-selection li ul:hover,
+ul.language-selection li ul:focus {
+	visibility: visible;
+	opacity: 1;
+	display: block;
+}
+
+ul.language-selection li ul li {
+	padding: .6rem;
+	clear: both;
+	border-bottom: 2px solid black;
+}
+
+ul.language-selection li ul li:last-child {
+	border-bottom: none;
 }
 
 /*
