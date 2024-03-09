@@ -470,20 +470,12 @@ div.taglist p {
 	position: relative;
 }
 
-div.taglist p::after {
-	position: absolute;
-	content: "↗";
-	font-size: 0.6em;
-	bottom: 0.8em;
-	visibility: hidden;
-}
-
 div.taglist p a {
 	color: var(--color-tag-p-fg);
 }
 
-div.taglist p:hover::after {
-	visibility: visible;
+div.taglist p a:hover {
+	color: var(--color-fg);
 }
 
 div.taglist p:first-child {
@@ -744,6 +736,7 @@ div.blog-entry h2::before {
 	position: relative;
 }
 
+/*
 .pinned::after {
 	content: '📌';
 	position: absolute;
@@ -751,6 +744,7 @@ div.blog-entry h2::before {
 	right: 0;
 	padding: 1em;
 }
+*/
 
 hr {
 	width: 90%;
