@@ -12,11 +12,7 @@ func panicIf[T any](t T, err error) T {
 }
 
 func main() {
-	//l := NewLexer([]byte(input))
-	//tokenizer := NewTokenizer([]rune("(    title     Hello    (bold World)   and also Hello (italic Moon) )"))
-	//fmt.Printf("%v\n", panicIf(tokenizer.Tokenize()))
-	//tokenizer := NewTokenizer([]rune(input))
-	tokenizer := NewTokenizer([]rune(ignore))
+	tokenizer := NewTokenizer([]rune(input))
 	for _, t := range panicIf(tokenizer.Tokenize()) {
 		fmt.Println(t)
 	}
@@ -52,26 +48,28 @@ Within this text there lays (sidenote (t hidden) This is a sidenote) a sidenote.
 (enquote This text is in quotes)
 (q Same as enquote but shorter)
 
-(q I am quoting someone (cite Someone))
 
-(footnotes)
-
-)
-`
-
-const ignore = `
-(code "
+(code \+
 func pointOfNoReturn(n int) (r int) {
 	defer func() {
 		recover()
 		r = n + 1 // calculate result
 	}()
 	panic("no return")
+	unquote? \\+
 }
-")
+\+)
+
 
 Here I'm escaping parentheses: \( hello world \).
-And here I'm escaping a backslash (reverse solidus): \\.
+And here I'm escaping a backslash \(reverse solidus\): \\.
+
+
+(q I am quoting someone (cite Someone))
+
+(footnotes)
+
+)
 `
 
 const test = `

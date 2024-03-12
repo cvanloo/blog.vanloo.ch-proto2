@@ -2,17 +2,6 @@ package main
 
 import "fmt"
 
-// Input:
-// (title Hello World)
-
-// Tokenizer:
-// TokenFormStart{"("}
-// TokenAtom{"title"}
-// TokenText{"Hello World"}
-// TokenFormEnd{")"}
-
-const EOF rune = 0
-
 type TokenType int
 const (
 	TypeFormStart TokenType = iota
@@ -30,13 +19,13 @@ type Token struct {
 func (t Token) String() string {
 	switch (t.Type) {
 	case TypeFormStart:
-		return fmt.Sprintf("FormStart{\"%d: `%s`\"}", t.Pos, visibleString(t.Text))
+		return fmt.Sprintf("FormStart{%d: `%s`}", t.Pos, visibleString(t.Text))
 	case TypeAtom:
-		return fmt.Sprintf("Atom{\"%d: `%s`\"}", t.Pos, visibleString(t.Text))
+		return fmt.Sprintf("Atom{%d: `%s`}", t.Pos, visibleString(t.Text))
 	case TypeText:
-		return fmt.Sprintf("Text{\"%d: `%s`\"}", t.Pos, visibleString(t.Text))
+		return fmt.Sprintf("Text{%d: `%s`}", t.Pos, visibleString(t.Text))
 	case TypeFormEnd:
-		return fmt.Sprintf("FormEnd{\"%d: `%s`\"}", t.Pos, visibleString(t.Text))
+		return fmt.Sprintf("FormEnd{%d: `%s`}", t.Pos, visibleString(t.Text))
 	}
 	return "Invalid{~}"
 }
@@ -132,7 +121,20 @@ func (t *Tokenizer) tokText() tokFunc { // parse text
 		return t.tokEOF
 	}
 	textEnd := t.pos
-	for textEnd < len(t.bs) && t.bs[textEnd] != ')' && t.bs[textEnd] != '(' {
+	quoted := false
+	for textEnd < len(t.bs) && ((t.bs[textEnd] != ')' && t.bs[textEnd] != '(') || quoted) {
+		if t.bs[textEnd] == '\\' {
+			if textEnd+1 < len(t.bs) && (t.bs[textEnd+1] == '(' || t.bs[textEnd+1] == ')' || t.bs[textEnd+1] == '\\') {
+				// @todo: remove `\` ?
+				textEnd++
+			} else if textEnd+1 < len(t.bs) && t.bs[textEnd+1] == '+' {
+				// @todo: remove `\+` ?
+				textEnd++
+				quoted = !quoted
+			} else {
+				panic("invalid escape character") // @todo: error handling
+			}
+		}
 		textEnd++
 	}
 	t.tokens = append(t.tokens, Token{
