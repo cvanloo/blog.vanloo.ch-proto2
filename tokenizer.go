@@ -31,6 +31,7 @@ func (t Token) String() string {
 		return fmt.Sprintf("FormEnd{%d: `%s`}", t.Pos, visibleString(t.Text))
 	}
 	log.Fatalf("invalid token type: %v", t.Type)
+	return fmt.Sprintf("Invalid[%d]{%d: `%s`}", t.Type, t.Pos, visibleString(t.Text))
 }
 
 func visibleString(s string) string {
@@ -103,16 +104,16 @@ func NewTokenizer(bs []rune) *Tokenizer {
 func (t *Tokenizer) Tokenize() ([]Token, error) {
 	t.state = t.tokTextOrForm
 	for t.pos < t.l && t.state != nil {
+		t.skipWhitespace()
+		if t.pos >= t.l {
+			t.state = t.tokEOF
+		}
 		t.state = t.state()
 	}
 	return t.tokens, nil
 }
 
 func (t *Tokenizer) tokTextOrForm() tokFunc { // initial state
-	t.skipWhitespace()
-	if t.pos >= t.l {
-		return t.tokEOF
-	}
 	if t.bs[t.pos] == '(' {
 		return t.tokForm
 	}
@@ -120,10 +121,6 @@ func (t *Tokenizer) tokTextOrForm() tokFunc { // initial state
 }
 
 func (t *Tokenizer) tokText() tokFunc { // parse text
-	t.skipWhitespace()
-	if t.pos >= t.l {
-		return t.tokEOF
-	}
 	textEnd := t.pos
 	quoted := false
 	for textEnd < t.l && ((t.bs[textEnd] != ')' && t.bs[textEnd] != '(') || quoted) {
@@ -163,10 +160,6 @@ func (t *Tokenizer) tokForm() tokFunc { // parse form start
 }
 
 func (t *Tokenizer) tokNilOrAtom() tokFunc {
-	t.skipWhitespace()
-	if t.pos >= t.l {
-		return t.tokEOF
-	}
 	r := t.bs[t.pos]
 	if r == '(' {
 		panic("invalid: cannot start form / expected atom or nil") // @todo: error handling
@@ -204,10 +197,6 @@ func (t *Tokenizer) tokAtom() tokFunc { // parse atom
 }
 
 func (t *Tokenizer) tokNilOrTextOrForm() tokFunc {
-	t.skipWhitespace()
-	if t.pos >= t.l {
-		return t.tokEOF
-	}
 	r := t.bs[t.pos]
 	if r == ')' {
 		return t.tokNil
@@ -242,7 +231,7 @@ func (t *Tokenizer) tokEOF() tokFunc {
 }
 
 func (t *Tokenizer) skipWhitespace() {
-	for t.pos < t.bs && isWhitespace(t.bs[t.pos]) {
+	for t.pos < t.l && isWhitespace(t.bs[t.pos]) {
 		// @todo: count line / column
 		t.pos++
 	}
