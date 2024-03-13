@@ -1,4 +1,4 @@
-package main
+package tok
 
 import (
 	"fmt"
@@ -92,6 +92,7 @@ type Tokenizer struct {
 	pos int
 	tokens []Token
 	state tokFunc
+	err error
 }
 
 func NewTokenizer(bs []rune) *Tokenizer {
@@ -104,6 +105,11 @@ func NewTokenizer(bs []rune) *Tokenizer {
 func (t *Tokenizer) Tokenize() ([]Token, error) {
 	t.state = t.tokTextOrForm
 	for t.pos < t.l && t.state != nil {
+		// @todo: newlines
+		//   {{1}}\n{{2}}   put into same <p>{{1}}{{2}}</p>
+		//   {{1}}\n\n{{2}} put into different <p>{{1}}</p><p>{{2}}</p>
+		//   do this in lexer
+		//   parse all/necessary (?) whitespace, don't skip it
 		t.skipWhitespace()
 		if t.pos >= t.l {
 			t.state = t.tokEOF
@@ -111,6 +117,12 @@ func (t *Tokenizer) Tokenize() ([]Token, error) {
 		t.state = t.state()
 	}
 	return t.tokens, nil
+}
+
+func (t *Tokenizer) tokError(err error) tokFunc {
+	// @todo: format error
+	t.err = err
+	return nil
 }
 
 func (t *Tokenizer) tokTextOrForm() tokFunc { // initial state

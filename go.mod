@@ -1,3 +1,3 @@
-module github.com/cvanloo/blog.vanloo.ch
+module be
 
 go 1.22.1

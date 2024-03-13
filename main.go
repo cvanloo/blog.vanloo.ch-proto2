@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"be/tok"
+	"be/lex"
 )
 
 func panicIf[T any](t T, err error) T {
@@ -12,10 +14,12 @@ func panicIf[T any](t T, err error) T {
 }
 
 func main() {
-	tokenizer := NewTokenizer([]rune(input))
-	for _, t := range panicIf(tokenizer.Tokenize()) {
-		fmt.Println(t)
-	}
+	tokenizer := tok.NewTokenizer([]rune("(title Hello, World!)"))
+	tokens := panicIf(tokenizer.Tokenize())
+	//for _, t := range tokens {
+	//	fmt.Println(t)
+	//}
+	fmt.Printf("%s\n", lex.Lex(tokens))
 }
 
 const input = `
