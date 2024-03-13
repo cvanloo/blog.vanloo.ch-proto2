@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 type TokenType int
 const (
@@ -27,7 +30,7 @@ func (t Token) String() string {
 	case TypeFormEnd:
 		return fmt.Sprintf("FormEnd{%d: `%s`}", t.Pos, visibleString(t.Text))
 	}
-	return "Invalid{~}"
+	log.Fatalf("invalid token type: %v", t.Type)
 }
 
 func visibleString(s string) string {
@@ -84,6 +87,7 @@ type tokFunc func() tokFunc
 
 type Tokenizer struct {
 	bs []rune
+	l int
 	pos int
 	tokens []Token
 	state tokFunc
@@ -92,13 +96,13 @@ type Tokenizer struct {
 func NewTokenizer(bs []rune) *Tokenizer {
 	return &Tokenizer{
 		bs: bs,
+		l: len(bs),
 	}
 }
 
 func (t *Tokenizer) Tokenize() ([]Token, error) {
-	l := len(t.bs)
 	t.state = t.tokTextOrForm
-	for t.pos < l && t.state != nil {
+	for t.pos < t.l && t.state != nil {
 		t.state = t.state()
 	}
 	return t.tokens, nil
@@ -106,7 +110,7 @@ func (t *Tokenizer) Tokenize() ([]Token, error) {
 
 func (t *Tokenizer) tokTextOrForm() tokFunc { // initial state
 	t.skipWhitespace()
-	if t.pos >= len(t.bs) {
+	if t.pos >= t.l {
 		return t.tokEOF
 	}
 	if t.bs[t.pos] == '(' {
@@ -117,17 +121,17 @@ func (t *Tokenizer) tokTextOrForm() tokFunc { // initial state
 
 func (t *Tokenizer) tokText() tokFunc { // parse text
 	t.skipWhitespace()
-	if t.pos >= len(t.bs) {
+	if t.pos >= t.l {
 		return t.tokEOF
 	}
 	textEnd := t.pos
 	quoted := false
-	for textEnd < len(t.bs) && ((t.bs[textEnd] != ')' && t.bs[textEnd] != '(') || quoted) {
+	for textEnd < t.l && ((t.bs[textEnd] != ')' && t.bs[textEnd] != '(') || quoted) {
 		if t.bs[textEnd] == '\\' {
-			if textEnd+1 < len(t.bs) && (t.bs[textEnd+1] == '(' || t.bs[textEnd+1] == ')' || t.bs[textEnd+1] == '\\') {
+			if textEnd+1 < t.l && (t.bs[textEnd+1] == '(' || t.bs[textEnd+1] == ')' || t.bs[textEnd+1] == '\\') {
 				// @todo: remove `\` ?
 				textEnd++
-			} else if textEnd+1 < len(t.bs) && t.bs[textEnd+1] == '+' {
+			} else if textEnd+1 < t.l && t.bs[textEnd+1] == '+' {
 				// @todo: remove `\+` ?
 				textEnd++
 				quoted = !quoted
@@ -160,7 +164,7 @@ func (t *Tokenizer) tokForm() tokFunc { // parse form start
 
 func (t *Tokenizer) tokNilOrAtom() tokFunc {
 	t.skipWhitespace()
-	if t.pos >= len(t.bs) {
+	if t.pos >= t.l {
 		return t.tokEOF
 	}
 	r := t.bs[t.pos]
@@ -186,7 +190,7 @@ func (t *Tokenizer) tokNil() tokFunc { // parse form end
 
 func (t *Tokenizer) tokAtom() tokFunc { // parse atom
 	atomEnd := t.pos
-	for atomEnd < len(t.bs) && isAlphaNum(t.bs[atomEnd]) {
+	for atomEnd < t.l && isAlphaNum(t.bs[atomEnd]) {
 		atomEnd++
 	}
 	t.tokens = append(t.tokens, Token{
@@ -201,7 +205,7 @@ func (t *Tokenizer) tokAtom() tokFunc { // parse atom
 
 func (t *Tokenizer) tokNilOrTextOrForm() tokFunc {
 	t.skipWhitespace()
-	if t.pos >= len(t.bs) {
+	if t.pos >= t.l {
 		return t.tokEOF
 	}
 	r := t.bs[t.pos]
@@ -238,7 +242,8 @@ func (t *Tokenizer) tokEOF() tokFunc {
 }
 
 func (t *Tokenizer) skipWhitespace() {
-	for t.pos < len(t.bs) && isWhitespace(t.bs[t.pos]) {
+	for t.pos < t.bs && isWhitespace(t.bs[t.pos]) {
+		// @todo: count line / column
 		t.pos++
 	}
 }
