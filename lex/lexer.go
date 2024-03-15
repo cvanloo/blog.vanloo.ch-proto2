@@ -36,11 +36,57 @@ const (
 	TypeText
 )
 
+type LLHead struct {
+	First, Last *LLNode
+}
+
+type LLNode struct {
+	Next *LLNode
+	El *Node
+}
+
+func (h *LLHead) Append(el *Node) {
+	n := &LLNode{
+		Next: nil,
+		El: el,
+	}
+	if h.First == nil {
+		h.First = n
+	} else {
+		h.Last.Next = n
+	}
+	h.Last = n
+}
+
+func (h LLHead) String() string {
+	s := "Form("
+	if h.First == nil {
+		s += "nil"
+	} else {
+		s += h.First.String()
+	}
+	s += ")"
+	return s
+}
+
+func (n LLNode) String() (s string) {
+	if n.El == nil {
+		s = "nil"
+	} else {
+		s = n.El.String()
+		if n.Next != nil {
+			s += ", "
+			s += n.Next.String()
+		}
+	}
+	return
+}
+
 type Node struct {
 	Type FormType
-	Atom Atom
-	Text Text
-	Form *Form
+	Atom Atom  // TypeAtom
+	Text Text  // TypeText
+	Form *LLHead // TypeForm
 }
 
 func (n Node) String() string {
@@ -56,35 +102,6 @@ func (n Node) String() string {
 	}
 }
 
-type Form struct {
-	Next *Form
-	Element *Node
-}
-
-const NilForm = Form{
-	Next: NilForm,
-	Element: NilForm,
-}
-
-func (f Form) String() string {
-	s := "Form("
-	if f.Element == nil {
-		s += "nil"
-	} else {
-		s += f.Element.String()
-	}
-	for c := f.Next; c != nil; c = c.Next {
-		s += ", "
-		if c.Element == nil {
-			s += "nil"
-		} else {
-			s += c.Element.String()
-		}
-	}
-	s += ")"
-	return s
-}
-
 type Atom string
 
 func (a Atom) String() string {
@@ -97,55 +114,41 @@ func (t Text) String() string {
 	return fmt.Sprintf("Text(%s)", string(t))
 }
 
-func Lex(tokens []tok.Token) *Node {
-	root := &Form{
-		Element: &Node{
-			Type: TypeAtom,
-			Atom: Atom("root"),
-		},
-	}
-	rootNode := &Node{
-		Type: TypeForm,
-		Form: root,
-	}
-	forms := []*Form{}
-	forms = append(forms, root)
-	for i, l := 0, len(tokens); i < l; i++ {
-		t := tokens[i]
+func Lex(tokens []tok.Token) *LLHead {
+	root := &LLHead{}
+	root.Append(&Node{
+		Type: TypeAtom,
+		Atom: "root",
+	})
+	forms := []*LLHead{root}
+	for _, t := range tokens {
+		top := forms[len(forms)-1]
 		switch t.Type {
 		case tok.TypeFormStart:
+			head := &LLHead{}
 			form := &Node{
 				Type: TypeForm,
-				Form: &Form{},
+				Form: head,
 			}
-			top := forms[len(forms)-1]
-			top.Next = &Form{
-				Element: form,
-			}
-			forms = append(forms, form.Form)
+			top.Append(form)
+			forms = append(forms, head)
 		case tok.TypeAtom:
 			atom := &Node{
 				Type: TypeAtom,
 				Atom: Atom(t.Text),
 			}
-			top := forms[len(forms)-1]
-			top.Next = &Form{
-				Element: atom,
-			}
+			top.Append(atom)
 		case tok.TypeText:
 			text := &Node{
 				Type: TypeText,
 				Text: Text(t.Text),
 			}
-			top := forms[len(forms)-1]
-			top.Next = &Form{
-				Element: text,
-			}
+			top.Append(text)
 		case tok.TypeFormEnd:
 			forms = forms[:len(forms)-1]
 		default:
 			panic("invalid token")
 		}
 	}
-	return rootNode
+	return root
 }

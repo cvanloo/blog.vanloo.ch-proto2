@@ -16,9 +16,10 @@ func panicIf[T any](t T, err error) T {
 func main() {
 	tokenizer := tok.NewTokenizer([]rune("(title Hello, World!)"))
 	tokens := panicIf(tokenizer.Tokenize())
-	//for _, t := range tokens {
-	//	fmt.Println(t)
-	//}
+	for _, t := range tokens {
+		fmt.Println(t)
+	}
+	fmt.Println("---------------")
 	fmt.Printf("%s\n", lex.Lex(tokens))
 }
 
