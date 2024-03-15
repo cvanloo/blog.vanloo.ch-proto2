@@ -5,6 +5,7 @@ type Sidenote struct {
 	ShortText, ExpandedText string
 }
 
+// Adapted @from: https://github.com/kslstn/sidenotes
 const HtmlSidenote = `
 {{ define "Sidenote" }}
 <span class="sidenote">
