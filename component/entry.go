@@ -169,7 +169,7 @@ const HtmlEntry = `
 		</main>
 		<footer>
 			<p id="eof">STOP)))))</p>
-			<address>&copy; {{.Meta.CopyYear}} <a href="mailto:{{.Author.EMail}}}}">{{.Author.Name}}</a></address>
+			<address>&copy; {{.Meta.CopyYear}} <a href="mailto:{{.Author.EMail}}">{{.Author.Name}}</a></address>
 			<span class="credits">
 				<a href="/about.html#credits">Font Licenses</a>
 				<a href="/about.html">About</a>

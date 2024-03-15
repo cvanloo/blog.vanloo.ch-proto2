@@ -50,7 +50,10 @@ func Handler() http.HandlerFunc {
 				Published: time.Now(),
 			},
 			Abstract: "A bit expensive, but well worth the money.",
-			Languages: /*[]Language{}*/ nil,
+			Languages: []Language{
+				{"/en/remarkable-review", "English"},
+				{"/shavian/remarkable-review", "Shavian"},
+			},
 			Content: /*lex.Node*/ nil,
 		}
 
