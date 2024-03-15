@@ -59,24 +59,41 @@ func (h *LLHead) Append(el *Node) {
 }
 
 func (h LLHead) String() string {
-	s := "Form("
-	if h.First == nil {
-		s += "nil"
-	} else {
-		s += h.First.String()
+	return h.StringIndent(0)
+}
+
+func tabs(n int) (s string) {
+	for i := 0; i < n; i++ {
+		s += "  "
 	}
-	s += ")"
+	return
+}
+
+func (h LLHead) StringIndent(level int) (s string) {
+	s += tabs(level); s += "Form("
+	if h.First == nil {
+		s += tabs(level+1); s += "nil"
+	} else {
+		s += "\n"
+		s += h.First.StringIndent(level+1)
+		s += "\n"
+	}
+	s += tabs(level); s += ")"
 	return s
 }
 
 func (n LLNode) String() (s string) {
+	return n.StringIndent(0)
+}
+
+func (n LLNode) StringIndent(level int) (s string) {
 	if n.El == nil {
-		s = "nil"
+		s += tabs(level); s += "nil"
 	} else {
-		s = n.El.String()
+		s += n.El.StringIndent(level)
 		if n.Next != nil {
-			s += ", "
-			s += n.Next.String()
+			s += ",\n"
+			s += n.Next.StringIndent(level)
 		}
 	}
 	return
@@ -90,13 +107,17 @@ type Node struct {
 }
 
 func (n Node) String() string {
+	return n.StringIndent(0)
+}
+
+func (n Node) StringIndent(level int) string {
 	switch n.Type {
 	case TypeForm:
-		return n.Form.String()
+		return n.Form.StringIndent(level)
 	case TypeAtom:
-		return n.Atom.String()
+		return n.Atom.StringIndent(level)
 	case TypeText:
-		return n.Text.String()
+		return n.Text.StringIndent(level)
 	default:
 		panic("invalid type")
 	}
@@ -105,13 +126,21 @@ func (n Node) String() string {
 type Atom string
 
 func (a Atom) String() string {
-	return fmt.Sprintf("Atom(%s)", string(a))
+	return a.StringIndent(0)
+}
+
+func (a Atom) StringIndent(level int) string {
+	return tabs(level) + fmt.Sprintf("Atom(%s)", string(a))
 }
 
 type Text string
 
 func (t Text) String() string {
-	return fmt.Sprintf("Text(%s)", string(t))
+	return t.StringIndent(0)
+}
+
+func (t Text) StringIndent(level int) string {
+	return tabs(level) + fmt.Sprintf("Text(%s)", string(t))
 }
 
 func Lex(tokens []tok.Token) *LLHead {
