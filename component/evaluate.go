@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"time"
 
 	"be/lex"
 )
@@ -36,7 +37,24 @@ func (t *Template) Render(w io.Writer, name string, data any) error {
 
 func Handler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := pages.Render(w, "Entry", nil)
+
+		data := EntryData {
+			BlogName: "save-lisp-or-die",
+			Title: "Does it deserve its name? Reviewing the reMarkable",
+			Author: Author{
+				Name: "Colin van\u00A0Loo",
+				EMail: "save-lisp-and-die+remarkable-review@vanloo.ch",
+			},
+			Tags: Tags{"review", "remarkable", "technology"},
+			Meta: Meta{
+				Published: time.Now(),
+			},
+			Abstract: "A bit expensive, but well worth the money.",
+			Languages: /*[]Language{}*/ nil,
+			Content: /*lex.Node*/ nil,
+		}
+
+		err := pages.Render(w, "Entry", data)
 		if err != nil {
 			panic(err)
 		}

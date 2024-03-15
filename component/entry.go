@@ -48,7 +48,17 @@ func (m Meta) IsRevised() bool {
 }
 
 func (m Meta) LastRevised() time.Time {
-	return m.Revisions[len(m.Revisions)-1]
+	if len(m.Revisions) > 0 {
+		return m.Revisions[len(m.Revisions)-1]
+	}
+	return time.Time{}
+}
+
+func (m Meta) CopyYear() int {
+	if m.IsRevised() {
+		return m.LastRevised().Year()
+	}
+	return m.Published.Year()
 }
 
 type Author struct {
@@ -69,7 +79,7 @@ type EntryData struct {
 	Meta Meta
 	Abstract string
 	Languages []Language
-	Content lex.Node
+	Content *lex.Node
 }
 
 const HtmlEntry = `
@@ -87,11 +97,13 @@ const HtmlEntry = `
 		<meta name="author" content="{{.Author.Name}}" />
 		<meta name="keywords" content="{{.Tags.KeywordList}}"/>
 		<meta name="description" content="{{.Meta.Description}}"/>
+		{{ if .Meta.IsRevised }}
 		<meta name="revised" content="{{.Meta.LastRevised}}" />
+		{{ end }}
 		<meta name="topic" content="{{.Meta.Topic}}">
 		<meta name="subject" content="{{.Meta.Topic}}">
 		<meta name="language" content="{{.Meta.Language}}">
-		<meta name="abstract" content="{{.Meta.Abstract}}">
+		<meta name="abstract" content="{{.Abstract}}">
 		<meta name="summary" content="{{.Abstract}}">
 		<meta name="url" content="{{.Meta.CanonicalURL}}">
 
@@ -130,7 +142,7 @@ const HtmlEntry = `
 					<aside class="content-info">
 						<div class="info">
 							<p class="published-date"><small>{{.Meta.Published}}</small></p>
-							<p class="time-est-reading"><small>{{.EstReadingTime}}</small></p>
+							<p class="time-est-reading"><small>{{.Meta.EstReadingTime}}</small></p>
 						</div>
 						<div class="taglist">
 							{{ range .Tags }}
@@ -149,7 +161,7 @@ const HtmlEntry = `
 					</li>
 				</ul>
 
-				{{ range .Content }}
+				{{ if .Content }}
 					{{ Evaluate . }}
 				{{ end }}
 
@@ -157,7 +169,7 @@ const HtmlEntry = `
 		</main>
 		<footer>
 			<p id="eof">STOP)))))</p>
-			<address>&copy; {{.Meta.LastRevised.Year}} <a href="mailto:{{.Author.EMail}}}}">{{.Author.Name}}</a></address>
+			<address>&copy; {{.Meta.CopyYear}} <a href="mailto:{{.Author.EMail}}}}">{{.Author.Name}}</a></address>
 			<span class="credits">
 				<a href="/about.html#credits">Font Licenses</a>
 				<a href="/about.html">About</a>
