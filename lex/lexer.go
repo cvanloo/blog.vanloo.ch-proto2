@@ -130,7 +130,7 @@ func (a Atom) String() string {
 }
 
 func (a Atom) StringIndent(level int) string {
-	return tabs(level) + fmt.Sprintf("Atom(%s)", string(a))
+	return tabs(level) + fmt.Sprintf("Atom(%s)", tok.VisibleString(string(a)))
 }
 
 type Text string
@@ -140,7 +140,7 @@ func (t Text) String() string {
 }
 
 func (t Text) StringIndent(level int) string {
-	return tabs(level) + fmt.Sprintf("Text(%s)", string(t))
+	return tabs(level) + fmt.Sprintf("Text(%s)", tok.VisibleString(string(t)))
 }
 
 func Lex(tokens []tok.Token) *LLHead {

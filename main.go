@@ -14,8 +14,8 @@ func panicIf[T any](t T, err error) T {
 }
 
 func main() {
-	tokenizer := tok.NewTokenizer([]rune("(title Hello, World!)"))
-	//tokenizer := tok.NewTokenizer([]rune(testInput))
+	//tokenizer := tok.NewTokenizer([]rune("(title Hello, World!)"))
+	tokenizer := tok.NewTokenizer([]rune(testInput))
 	tokens := panicIf(tokenizer.Tokenize())
 	for _, t := range tokens {
 		fmt.Println(t)
@@ -30,6 +30,14 @@ const testInput = `
 (brief Some summary)
 (hidden)
 (pinned)
+
+(body
+
+(comment This text does not appear in the output)
+
+(table-of-contents)
+
+Lorem ipsum dolor sit amet.
 `
 
 const input = `

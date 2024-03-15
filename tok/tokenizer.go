@@ -22,19 +22,19 @@ type Token struct {
 func (t Token) String() string {
 	switch (t.Type) {
 	case TypeFormStart:
-		return fmt.Sprintf("FormStart{%d: `%s`}", t.Pos, visibleString(t.Text))
+		return fmt.Sprintf("FormStart{%d: `%s`}", t.Pos, VisibleString(t.Text))
 	case TypeAtom:
-		return fmt.Sprintf("Atom{%d: `%s`}", t.Pos, visibleString(t.Text))
+		return fmt.Sprintf("Atom{%d: `%s`}", t.Pos, VisibleString(t.Text))
 	case TypeText:
-		return fmt.Sprintf("Text{%d: `%s`}", t.Pos, visibleString(t.Text))
+		return fmt.Sprintf("Text{%d: `%s`}", t.Pos, VisibleString(t.Text))
 	case TypeFormEnd:
-		return fmt.Sprintf("FormEnd{%d: `%s`}", t.Pos, visibleString(t.Text))
+		return fmt.Sprintf("FormEnd{%d: `%s`}", t.Pos, VisibleString(t.Text))
 	}
 	log.Fatalf("invalid token type: %v", t.Type)
-	return fmt.Sprintf("Invalid[%d]{%d: `%s`}", t.Type, t.Pos, visibleString(t.Text))
+	return fmt.Sprintf("Invalid[%d]{%d: `%s`}", t.Type, t.Pos, VisibleString(t.Text))
 }
 
-func visibleString(s string) string {
+func VisibleString(s string) string {
 	asciiSpecialLookup := [...]string{
 		"<NUL>",
 		"<SOH>",
