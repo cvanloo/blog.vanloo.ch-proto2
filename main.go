@@ -87,32 +87,3 @@ And here I'm escaping a backslash \(reverse solidus\): \\.
 
 )
 `
-
-const test = `
---- internal representation:
-(title (text Hello World))
-(tags (text :clojure :asm :lisp :fp))
-(brief (text Some summary))
-
---- equivalent to:
-(title "Hello World")
-(tags ":clojure :asm :lisp :fp")
-(brief "Some summary")
-
---- syntactic sugar:
-(title Hello World)
-(tags :clojure :asm :lisp :fp)
-(brief Some summary)
-
-(body Within this text there lays (sidenote (text hidden) This is a sidenote) a sidenote.)
-(body Within this text there lays (sidenote "hidden" This is a sidenote) a sidenote.)
-
-(p Hello World, Hello Moon, Goodbye World, Goodbye Moon)
-=> (p (text Hello World, Hello Moon, Goodbye World, Goodbye Moon))
-
-(p Hello World, (bold Hello) Moon, (italic Goodbye) World, Goodbye Moon)
-=> (p (text Hello World, (bold (text Hello)) Moon, (italic (text Goodbye)) World, Goodbye Moon))
-
-(p Hello World, Hello Moon, Goodbye World, Goodbye Moon (bold !))
-=> (p (text Hello World, Hello Moon, Goodbye World, Goodbye Moon (bold !)))
-`

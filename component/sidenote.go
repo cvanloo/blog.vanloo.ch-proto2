@@ -1,11 +1,14 @@
 package components
 
+import "html/template"
+
 type Sidenote struct {
 	ID int
 	ShortText, ExpandedText string
 }
 
 const HtmlSidenote = `
+{{ define "Sidenote" }}
 <span class="sidenote">
 	<input type="checkbox"
 		   id="sidenote__checkbox--{{.ID}}"
@@ -23,4 +26,5 @@ const HtmlSidenote = `
 		<span class="sidenote__content-parenthesis">)</span>
 	</small>
 </span>
+{{ end }}
 `

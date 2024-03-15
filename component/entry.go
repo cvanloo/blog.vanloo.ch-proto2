@@ -74,6 +74,7 @@ type EntryData struct {
 }
 
 const HtmlEntry = `
+{{ define "Entry" }}
 <!DOCTYPE html>
 <html lang="{{.Meta.Language}}">
 	<head>
@@ -178,4 +179,5 @@ const HtmlEntry = `
 		</script>
 	</body>
 </html>
+{{ end }}
 `
