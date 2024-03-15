@@ -135,24 +135,30 @@ func (t *Tokenizer) tokTextOrForm() tokFunc { // initial state
 func (t *Tokenizer) tokText() tokFunc { // parse text
 	textEnd := t.pos
 	quoted := false
+	text := ""
+	lastPos := t.pos
 	for textEnd < t.l && ((t.bs[textEnd] != ')' && t.bs[textEnd] != '(') || quoted) {
 		if t.bs[textEnd] == '\\' {
 			if textEnd+1 < t.l && (t.bs[textEnd+1] == '(' || t.bs[textEnd+1] == ')' || t.bs[textEnd+1] == '\\') {
-				// @todo: remove `\` ?
-				textEnd++
+				text += string(t.bs[lastPos:textEnd])
+				lastPos = textEnd + 1 // past backslash
+				textEnd += 2          // past escaped char
 			} else if textEnd+1 < t.l && t.bs[textEnd+1] == '+' {
-				// @todo: remove `\+` ?
-				textEnd++
+				text += string(t.bs[lastPos:textEnd])
+				lastPos = textEnd + 2 // past escaped char (exclude char)
+				textEnd += 2          // past escaped char
 				quoted = !quoted
 			} else {
 				panic("invalid escape character") // @todo: error handling
 			}
+		} else {
+			textEnd++
 		}
-		textEnd++
 	}
+	text += string(t.bs[lastPos:textEnd])
 	t.tokens = append(t.tokens, Token{
 		Type: TypeText,
-		Text: string(t.bs[t.pos:textEnd]),
+		Text: text,
 		Pos: t.pos,
 	})
 	t.pos = textEnd
