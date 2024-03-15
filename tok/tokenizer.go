@@ -104,7 +104,7 @@ func NewTokenizer(bs []rune) *Tokenizer {
 
 func (t *Tokenizer) Tokenize() ([]Token, error) {
 	t.state = t.tokTextOrForm
-	for t.pos < t.l && t.state != nil {
+	for t.pos <= t.l && t.state != nil {
 		// @todo: newlines
 		//   {{1}}\n{{2}}   put into same <p>{{1}}{{2}}</p>
 		//   {{1}}\n\n{{2}} put into different <p>{{1}}</p><p>{{2}}</p>
