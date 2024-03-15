@@ -1,6 +1,4 @@
-package components
-
-import "html/template"
+package component
 
 type Sidenote struct {
 	ID int

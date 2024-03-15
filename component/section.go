@@ -1,10 +1,6 @@
 package component
 
-import (
-	"html/template"
-
-	"be/lex"
-)
+import "be/lex"
 
 type Section struct {
 	ID string

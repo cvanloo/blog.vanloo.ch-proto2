@@ -3,6 +3,8 @@ package component
 import (
 	"bytes"
 	"html/template"
+	"io"
+	"net/http"
 
 	"be/lex"
 )
@@ -32,9 +34,19 @@ func (t *Template) Render(w io.Writer, name string, data any) error {
 	return t.Template.ExecuteTemplate(w, name, data)
 }
 
+func Handler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := pages.Render(w, "Entry", nil)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 func Evaluate(root *lex.Node) (html template.HTML, err error) {
 	buf := bytes.NewBuffer([]byte{})
-	err = pages.Render(buf, eval(root))
+	name, data := eval(root)
+	err = pages.Render(buf, name, data)
 	html = template.HTML(buf.String())
 	return
 }

@@ -1,7 +1,5 @@
 package component
 
-import "html/template"
-
 type CodeLine string
 
 type CodeBlock struct {

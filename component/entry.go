@@ -3,7 +3,6 @@ package component
 import (
 	"fmt"
 	"time"
-	"html/template"
 	"be/lex"
 )
 
@@ -80,8 +79,8 @@ const HtmlEntry = `
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="/styles.css" />
-		<link rel="icon" type="image/png" href="/favicon.png" />
+		<link rel="stylesheet" href="/public/styles.css" />
+		<link rel="icon" type="image/png" href="/public/favicon.png" />
 		<link rel="canonical" href="{{.Meta.CanonicalURL}}" />
 		<title>{{.Title}} &mdash; {{.BlogName}}</title>
 

@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+
+	"be/component"
 	"be/tok"
 	"be/lex"
 )
@@ -14,14 +17,19 @@ func panicIf[T any](t T, err error) T {
 }
 
 func main() {
-	//tokenizer := tok.NewTokenizer([]rune("(title Hello, World!)"))
-	tokenizer := tok.NewTokenizer([]rune(input))
+	tokenizer := tok.NewTokenizer([]rune("(title Hello, World!)"))
+	//tokenizer := tok.NewTokenizer([]rune(input))
 	tokens := panicIf(tokenizer.Tokenize())
 	for _, t := range tokens {
 		fmt.Println(t)
 	}
 	fmt.Println("---------------")
 	fmt.Printf("%s\n", lex.Lex(tokens))
+
+	http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))
+	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
+	http.HandleFunc("/", component.Handler())
+	http.ListenAndServe(":8080", nil)
 }
 
 const input = `
