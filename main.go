@@ -15,7 +15,6 @@ func panicIf[T any](t T, err error) T {
 
 func main() {
 	//tokenizer := tok.NewTokenizer([]rune("(title Hello, World!)"))
-	//tokenizer := tok.NewTokenizer([]rune(testInput))
 	tokenizer := tok.NewTokenizer([]rune(input))
 	tokens := panicIf(tokenizer.Tokenize())
 	for _, t := range tokens {
@@ -25,34 +24,9 @@ func main() {
 	fmt.Printf("%s\n", lex.Lex(tokens))
 }
 
-const testInput = `
-(title こんにちは、日本)
-(tags :clojure :asm :lisp :fp)
-(brief Some summary)
-(hidden)
-(pinned)
-
-(body
-
-(comment This text does not appear in the output)
-
-(table-of-contents)
-
-Lorem ipsum dolor sit amet.
-
-(bold This text is bold)
-(b Same as bold but shorter)
-
-(image someimage.png)
-
-
-Within this text there lays (sidenote (text hidden) This is a sidenote) a sidenote.
-Within this text there lays (sidenote (t hidden) This is a sidenote) a sidenote.
-`
-
 const input = `
 (title こんにちは、日本)
-(tags :clojure :asm :lisp :fp)
+(tags clojure asm lisp fp)
 (brief Some summary)
 (hidden)
 (pinned)
@@ -63,19 +37,29 @@ const input = `
 
 (table-of-contents)
 
+(section First Section)
+
 Lorem ipsum dolor sit amet.
+
+(subsection First Subsection)
 
 (bold This text is bold)
 (b Same as bold but shorter)
 
-(image someimage.png)
+(section Second Section)
 
+(image someimage.png)
 
 Within this text there lays (sidenote (text hidden) This is a sidenote) a sidenote.
 Within this text there lays (sidenote (t hidden) This is a sidenote) a sidenote.
 
 (italic This text is italic)
 (i Same as italic but shorter)
+
+(subsection Links)
+
+(link (text https://barcode.vanloo.ch/) Code-128 Generator)
+(link (extern) (text https://barcode.vanloo.ch/) Code-128 Generator \(external link\))
 
 (enquote This text is in quotes)
 (q Same as enquote but shorter)
