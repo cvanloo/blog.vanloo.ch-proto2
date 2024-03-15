@@ -24,11 +24,12 @@ func main() {
 		fmt.Println(t)
 	}
 	fmt.Println("---------------")
-	fmt.Printf("%s\n", lex.Lex(tokens))
+	root := lex.Lex(tokens)
+	fmt.Printf("%s\n", root)
 
 	http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
-	http.HandleFunc("/", component.Handler())
+	http.HandleFunc("/", component.Handler(root.First))
 	http.ListenAndServe(":8080", nil)
 }
 

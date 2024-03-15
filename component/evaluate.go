@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -35,7 +36,7 @@ func (t *Template) Render(w io.Writer, name string, data any) error {
 	return t.Template.ExecuteTemplate(w, name, data)
 }
 
-func Handler() http.HandlerFunc {
+func Handler(root *lex.LLNode) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		data := EntryData {
@@ -54,7 +55,7 @@ func Handler() http.HandlerFunc {
 				{"/en/remarkable-review", "English"},
 				{"/shavian/remarkable-review", "Shavian"},
 			},
-			Content: /*lex.Node*/ nil,
+			Content: root,
 		}
 
 		err := pages.Render(w, "Entry", data)
@@ -64,7 +65,7 @@ func Handler() http.HandlerFunc {
 	}
 }
 
-func Evaluate(root *lex.Node) (html template.HTML, err error) {
+func Evaluate(root *lex.LLNode) (html template.HTML, err error) {
 	buf := bytes.NewBuffer([]byte{})
 	name, data := eval(root)
 	err = pages.Render(buf, name, data)
@@ -72,6 +73,8 @@ func Evaluate(root *lex.Node) (html template.HTML, err error) {
 	return
 }
 
-func eval(node *lex.Node) (name string, data any) {
-	return
+func eval(node *lex.LLNode) (name string, data any) {
+	// @todo: implement
+	log.Println(node)
+	return "Paragraph", node.String()
 }

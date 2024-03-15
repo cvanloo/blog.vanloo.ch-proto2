@@ -79,7 +79,7 @@ type EntryData struct {
 	Meta Meta
 	Abstract string
 	Languages []Language
-	Content *lex.Node
+	Content *lex.LLNode
 }
 
 const HtmlEntry = `
@@ -162,7 +162,7 @@ const HtmlEntry = `
 				</ul>
 
 				{{ if .Content }}
-					{{ Evaluate . }}
+					{{ Evaluate .Content }}
 				{{ end }}
 
 			</article>
