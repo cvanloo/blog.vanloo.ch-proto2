@@ -73,7 +73,7 @@ type Language struct {
 
 type EntryData struct {
 	BlogName string
-	Title string
+	Title, AltTitle string
 	Author Author
 	Tags Tags
 	Meta Meta
@@ -92,7 +92,7 @@ const HtmlEntry = `
 		<link rel="stylesheet" href="/public/styles.css" />
 		<link rel="icon" type="image/png" href="/public/favicon.png" />
 		<link rel="canonical" href="{{.Meta.CanonicalURL}}" />
-		<title>{{.Title}} &mdash; {{.BlogName}}</title>
+		<title>{{.Title}} &mdash; ({{.BlogName}})</title>
 
 		<meta name="author" content="{{.Author.Name}}" />
 		<meta name="keywords" content="{{.Tags.KeywordList}}"/>
@@ -174,7 +174,7 @@ const HtmlEntry = `
 				<a href="/about.html#credits">Font Licenses</a>
 				<a href="/about.html">About</a>
 				<a href="/rss.xml">RSS Feed</a>
-			</span class="credits">
+			</span>
 		</footer>
 		<script>
 			function calculateProgress() {

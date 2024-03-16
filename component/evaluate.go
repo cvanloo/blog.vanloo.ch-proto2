@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
 
 	"be/lex"
 )
@@ -38,43 +37,41 @@ func (t *Template) Render(w io.Writer, name string, data any) error {
 
 func Handler(root *lex.LLNode) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		data := EntryData {
-			BlogName: "save-lisp-or-die",
-			Title: "Does it deserve its name? Reviewing the reMarkable",
-			Author: Author{
-				Name: "Colin van\u00A0Loo",
-				EMail: "save-lisp-and-die+remarkable-review@vanloo.ch",
-			},
-			Tags: Tags{"review", "remarkable", "technology"},
-			Meta: Meta{
-				Published: time.Now(),
-			},
-			Abstract: "A bit expensive, but well worth the money.",
-			Languages: []Language{
-				{"/en/remarkable-review", "English"},
-				{"/shavian/remarkable-review", "Shavian"},
-			},
-			Content: root,
+		name, data, err := eval(root)
+		if err != nil {
+			panic(err)
 		}
 
-		err := pages.Render(w, "Entry", data)
+		err = pages.Render(w, name, data)
 		if err != nil {
 			panic(err)
 		}
 	}
 }
 
-func Evaluate(root *lex.LLNode) (html template.HTML, err error) {
+func Evaluate(root *lex.LLNode) (template.HTML, error) {
 	buf := bytes.NewBuffer([]byte{})
-	name, data := eval(root)
+	name, data, err := eval(root)
+	if err != nil {
+		var zero template.HTML
+		return zero, err
+	}
 	err = pages.Render(buf, name, data)
-	html = template.HTML(buf.String())
-	return
+	html := template.HTML(buf.String())
+	return html, err
 }
 
-func eval(node *lex.LLNode) (name string, data any) {
+func eval(node *lex.LLNode) (name string, data any, err error) {
 	// @todo: implement
-	log.Println(node)
-	return "Paragraph", node.String()
+	log.Printf("eval start ---:\n%s\n--- eval end\n", node)
+
+	el := node.El
+	switch el.Type {
+	case lex.TypeForm:
+		fun := eval(node.Next)
+	case lex.TypeAtom:
+		fun := funcMap[el.Atom]
+	case lex.TypeText:
+	}
+	return "Paragraph", node.String(), nil
 }
