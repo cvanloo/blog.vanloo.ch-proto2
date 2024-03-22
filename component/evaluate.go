@@ -61,6 +61,37 @@ func Evaluate(root *lex.LLNode) (template.HTML, error) {
 	return html, err
 }
 
+var blog = EntryData{
+	// set defaults (@todo: read in from config file?)
+	BlogName: "save-lisp-and-die",
+	Author: Author{
+		Name: "cvl",
+		EMail: "",
+	},
+}
+
+var beFuncs = map[string]func(args ...string) {
+	"title": func(args ...string) {
+		blog.Title = args[0]
+		if len(args) > 1 {
+			blog.AltTitle = args[1]
+		}
+	},
+	"author": func(args ...string) {
+		// @todo: register sub funcs:
+		//        - name
+		//        - email
+	},
+	"abstract": func(args ...string) {
+		blog.Abstract = args[0]
+	},
+	"bold": func(args ...string) {
+
+	},
+	"italic": func(args ...string) {
+	},
+}
+
 func eval(node *lex.LLNode) (name string, data any, err error) {
 	// @todo: implement
 	log.Printf("eval start ---:\n%s\n--- eval end\n", node)
@@ -68,9 +99,9 @@ func eval(node *lex.LLNode) (name string, data any, err error) {
 	el := node.El
 	switch el.Type {
 	case lex.TypeForm:
-		fun := eval(node.Next)
+		//fun := eval(node.Next)
 	case lex.TypeAtom:
-		fun := funcMap[el.Atom]
+		//fun := funcMap[el.Atom]
 	case lex.TypeText:
 	}
 	return "Paragraph", node.String(), nil
