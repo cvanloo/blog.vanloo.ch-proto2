@@ -4,9 +4,9 @@ import (
 	"fmt"
 	//"net/http"
 
-	//"be/component"
+	"be/component"
 	"be/tok"
-	//"be/lex"
+	"be/lex"
 )
 
 func panicIf[T any](t T, err error) T {
@@ -17,15 +17,17 @@ func panicIf[T any](t T, err error) T {
 }
 
 func main() {
-	//tokenizer := tok.NewTokenizer([]rune(testInput))
-	tokenizer := tok.NewTokenizer([]rune(remarkableReviewBlogPostSource))
+	tokenizer := tok.NewTokenizer([]rune(testInput))
+	//tokenizer := tok.NewTokenizer([]rune(remarkableReviewBlogPostSource))
 	tokens := panicIf(tokenizer.Tokenize())
 	for _, t := range tokens {
 		fmt.Println(t)
 	}
-	//fmt.Println("---------------")
-	//root := lex.Lex(tokens)
-	//fmt.Printf("%s\n", root)
+	fmt.Println("---------------")
+	root := lex.Lex(tokens)
+	fmt.Printf("%s\n", root)
+
+	fmt.Println(component.String(root.First))
 
 	//http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))
 	//http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))

@@ -35,6 +35,20 @@ func (t *Template) Render(w io.Writer, name string, data any) error {
 	return t.Template.ExecuteTemplate(w, name, data)
 }
 
+func String(root *lex.LLNode) string {
+	name, data, err := eval(root)
+	if err != nil {
+		panic(err)
+	}
+
+	bs := &bytes.Buffer{}
+	err = pages.Render(bs, name, data)
+	if err != nil {
+		panic(err)
+	}
+	return bs.String()
+}
+
 func Handler(root *lex.LLNode) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name, data, err := eval(root)
