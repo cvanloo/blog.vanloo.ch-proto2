@@ -130,7 +130,7 @@ func (t *Tokenizer) tokText() tokFunc { // parse text
 				}
 			} else if t.bs[textEnd] == '\n' { // two newlines separate text blocks, lines divided by a single newline are joined
 				if textEnd+1 < t.l {
-					if t.bs[textEnd+1] == '\n' {
+					if t.bs[textEnd+1] == '\n' || t.bs[textEnd+1] == ')' {
 						break // this text block is finished
 						// @note: any further newlines are skipped in .Tokenize() by the call to .skipWhitespace()
 					} else {
