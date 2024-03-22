@@ -161,7 +161,7 @@ func (t *Tokenizer) tokText() tokFunc { // parse text
 						textEnd += 2          // past escaped char
 						quoted = !quoted
 					default:
-						return t.tokError(t.NewTokenError(fmt.Sprintf("invalid escape character: `%s`", esc)))
+						return t.tokError(t.NewTokenError(fmt.Sprintf("invalid escape character: `%s`", string(esc))))
 					}
 				} else {
 					return t.tokError(t.NewTokenError("unfinished escape character (did you mean `\\`?)"))
@@ -220,7 +220,10 @@ func (t *Tokenizer) tokNilOrAtom() tokFunc {
 	if r == ')' {
 		return t.tokNil
 	}
-	return t.tokAtom
+	if isAtomChar(r) {
+		return t.tokAtom
+	}
+	return t.tokError(t.NewTokenError(fmt.Sprintf("invalid character: `%s` / expected nil or atom", string(r))))
 }
 
 func (t *Tokenizer) tokNil() tokFunc { // parse form end
@@ -301,7 +304,7 @@ func isWhitespace(r rune) bool {
 }
 
 func isAlphaLower(r rune) bool {
-	return r >= 'a' && r <= 'z' || r == '-'
+	return r >= 'a' && r <= 'z' || r == '-' || r == '@'
 }
 
 func isNum(r rune) bool {
