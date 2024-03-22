@@ -17,9 +17,8 @@ func panicIf[T any](t T, err error) T {
 }
 
 func main() {
-	tokenizer := tok.NewTokenizer([]rune(testInput2))
 	//tokenizer := tok.NewTokenizer([]rune(testInput))
-	//tokenizer := tok.NewTokenizer([]rune(remarkableReviewBlogPostSource))
+	tokenizer := tok.NewTokenizer([]rune(remarkableReviewBlogPostSource))
 	tokens := panicIf(tokenizer.Tokenize())
 	for _, t := range tokens {
 		fmt.Println(t)
@@ -33,10 +32,6 @@ func main() {
 	//http.HandleFunc("/", component.Handler(root.First))
 	//http.ListenAndServe(":8080", nil)
 }
-
-const testInput2 = `
-(set :reMarkable (stylize :keep reMarkable))
-`
 
 const testInput = `
 (author (name Colin van~Loo) (email I'm not going to tell you....))

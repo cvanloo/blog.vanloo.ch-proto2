@@ -113,70 +113,81 @@ func (t *Tokenizer) tokText() tokFunc { // parse text
 		parsedText = ""
 	)
 	for textEnd < t.l && ((t.bs[textEnd] != ')' && t.bs[textEnd] != '(') || quoted) {
-		if t.bs[textEnd] == ' ' { // merge excessive white space
-			parsedText += string(t.bs[lastPos:textEnd])
-			lastPos = textEnd + 1 // past space
-			textEnd = lastPos
+		if !quoted {
+			if t.bs[textEnd] == ' ' { // merge excessive white space
+				parsedText += string(t.bs[lastPos:textEnd])
+				lastPos = textEnd + 1 // past space
+				textEnd = lastPos
 
-			for textEnd < t.l && t.bs[textEnd] == ' ' {
-				textEnd++
-			}
-			lastPos = textEnd
-
-			if textEnd < t.l && t.bs[textEnd] != '\n' && t.bs[textEnd] != '(' {
-				parsedText += " "
+				for textEnd < t.l && t.bs[textEnd] == ' ' {
+					textEnd++
+				}
 				lastPos = textEnd
-			}
-		} else if t.bs[textEnd] == '\n' { // two newlines separate text blocks, lines divided by a single newline are joined
-			if textEnd+1 < t.l {
-				if t.bs[textEnd+1] == '\n' {
-					break // this text block is finished
-					// @note: any further newlines are skipped in .Tokenize() by the call to .skipWhitespace()
+
+				if textEnd < t.l && t.bs[textEnd] != '\n' && t.bs[textEnd] != '(' {
+					parsedText += " "
+					lastPos = textEnd
+				}
+			} else if t.bs[textEnd] == '\n' { // two newlines separate text blocks, lines divided by a single newline are joined
+				if textEnd+1 < t.l {
+					if t.bs[textEnd+1] == '\n' {
+						break // this text block is finished
+						// @note: any further newlines are skipped in .Tokenize() by the call to .skipWhitespace()
+					} else {
+						// merge with next text block
+						parsedText += string(t.bs[lastPos:textEnd])
+						parsedText += " " // join with space
+						lastPos = textEnd + 1 // past \n
+						textEnd = lastPos
+					}
 				} else {
-					// merge with next text block
 					parsedText += string(t.bs[lastPos:textEnd])
-					parsedText += " " // join with space
-					lastPos = textEnd + 1 // past \n
+					lastPos = textEnd + 1
 					textEnd = lastPos
 				}
-			} else {
-				parsedText += string(t.bs[lastPos:textEnd])
-				lastPos = textEnd + 1
-				textEnd = lastPos
-			}
-		} else if t.bs[textEnd] == '\\' {
-			if textEnd+1 < t.l {
-				esc := t.bs[textEnd+1]
-				switch esc {
-				case '(': fallthrough
-				case ')': fallthrough
-				case '\\':
-					parsedText += string(t.bs[lastPos:textEnd])
-					lastPos = textEnd + 1 // past backslash
-					textEnd += 2          // past escaped char
-				case '+':
-					parsedText += string(t.bs[lastPos:textEnd])
-					lastPos = textEnd + 2 // past escaped char
-					textEnd += 2          // past escaped char
-					quoted = !quoted
-				default:
-					return t.tokError(t.NewTokenError(fmt.Sprintf("invalid escape character: `%s`", esc)))
+			} else if t.bs[textEnd] == '\\' {
+				if textEnd+1 < t.l {
+					esc := t.bs[textEnd+1]
+					switch esc {
+						case '(': fallthrough
+						case ')': fallthrough
+					case '\\':
+						parsedText += string(t.bs[lastPos:textEnd])
+						lastPos = textEnd + 1 // past backslash
+						textEnd += 2          // past escaped char
+					case '+':
+						parsedText += string(t.bs[lastPos:textEnd])
+						lastPos = textEnd + 2 // past escaped char
+						textEnd += 2          // past escaped char
+						quoted = !quoted
+					default:
+						return t.tokError(t.NewTokenError(fmt.Sprintf("invalid escape character: `%s`", esc)))
+					}
+				} else {
+					return t.tokError(t.NewTokenError("unfinished escape character (did you mean `\\`?)"))
 				}
+			} else if t.bs[textEnd] == '~' {
+				parsedText += string(t.bs[lastPos:textEnd])
+				parsedText += "\u00A0" // no-break space
+				lastPos = textEnd + 1  // past ~
+				textEnd = lastPos
+			} else if textEnd+2 < t.l && string(t.bs[textEnd:textEnd+3]) == "..." {
+				parsedText += string(t.bs[lastPos:textEnd])
+				parsedText += "\u2026" // horizontal ellipsis
+				lastPos = textEnd + 3  // past ...
+				textEnd = lastPos
 			} else {
-				return t.tokError(t.NewTokenError("unfinished escape character (did you mean `\\`?)"))
+				textEnd++
 			}
-		} else if t.bs[textEnd] == '~' {
-			parsedText += string(t.bs[lastPos:textEnd])
-			parsedText += "\u00A0" // no-break space
-			lastPos = textEnd + 1  // past ~
-			textEnd = lastPos
-		} else if textEnd+2 < t.l && string(t.bs[textEnd:textEnd+3]) == "..." {
-			parsedText += string(t.bs[lastPos:textEnd])
-			parsedText += "\u2026" // horizontal ellipsis
-			lastPos = textEnd + 3  // past ...
-			textEnd = lastPos
 		} else {
-			textEnd++
+			if t.bs[textEnd] == '\\' && textEnd+1 < t.l && t.bs[textEnd+1] == '+' {
+				parsedText += string(t.bs[lastPos:textEnd])
+				lastPos = textEnd + 2
+				textEnd = lastPos
+				quoted = false
+			} else {
+				textEnd++
+			}
 		}
 	}
 	parsedText += string(t.bs[lastPos:textEnd])
