@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"io"
 	"log"
-	"maps"
 	"net/http"
 	"strings"
 
@@ -44,10 +43,9 @@ func String(root *lex.LLHead) string {
 	if err != nil {
 		panic(err)
 	}
-	name := "Entry"
 
 	bs := &bytes.Buffer{}
-	err = pages.Render(bs, name, data)
+	err = pages.Render(bs, "Entry", data)
 	if err != nil {
 		panic(err)
 	}
@@ -60,9 +58,8 @@ func Handler(root *lex.LLHead) http.HandlerFunc {
 		if err != nil {
 			panic(err)
 		}
-		name := "Entry"
 
-		err = pages.Render(w, name, data)
+		err = pages.Render(w, "Entry", data)
 		if err != nil {
 			panic(err)
 		}
@@ -70,22 +67,20 @@ func Handler(root *lex.LLHead) http.HandlerFunc {
 }
 
 func Evaluate(root *lex.LLHead) (template.HTML, error) {
-	buf := bytes.NewBuffer([]byte{})
-
 	data, err := eval(nil, nil, root)
 	if err != nil {
 		var zero template.HTML
 		return zero, err
 	}
-	name := "Entry"
 
-	err = pages.Render(buf, name, data)
+	buf := &bytes.Buffer{}
+	err = pages.Render(buf, "Entry", data) // name = ?
 	html := template.HTML(buf.String())
 	return html, err
 }
 
 type (
-	BeFunc func(blog *EntryData, scopes *Scopes, args Args) error
+	BeFunc func(blog *EntryData, scope Scope, args Args) error
 	Scope map[string]BeFunc
 	Scopes struct {
 		scopes []Scope
@@ -142,8 +137,8 @@ func (sc *Scopes) Push(scope Scope) {
 	sc.scopes = append(sc.scopes, scope)
 }
 
-func (sc *Scopes) AddToTopScope(scope Scope) {
-	maps.Copy(sc.scopes[len(sc.scopes)-1], scope)
+func (sc *Scopes) Top() Scope {
+	return sc.scopes[len(sc.scopes)-1]
 }
 
 func (sc *Scopes) Pop() {
@@ -160,7 +155,7 @@ func (sc *Scopes) Resolve(name string) (fun BeFunc, err error) {
 }
 
 var beFuncs = Scope {
-	"root": func(blog *EntryData, scopes *Scopes, args Args) error {
+	"root": func(blog *EntryData, scope Scope, args Args) error {
 		blog.BlogName = "save-lisp-and-die"
 		blog.Author = Author{
 			Name: "cvl",
@@ -168,29 +163,27 @@ var beFuncs = Scope {
 
 		return args.Finished()
 	},
-	"eof": func(blog *EntryData, scopes *Scopes, args Args) error {
+	"eof": func(blog *EntryData, scope Scope, args Args) error {
 		return args.Finished()
 	},
-	"title": func(blog *EntryData, scopes *Scopes, args Args) error {
+	"title": func(blog *EntryData, scope Scope, args Args) error {
 		blog.Title = args.Next("title")
 		blog.AltTitle = args.Optional("alternative title")
 		return args.Finished()
 	},
-	"author": func(blog *EntryData, scopes *Scopes, args Args) error {
+	"author": func(blog *EntryData, scope Scope, args Args) error {
 		blog.Author = Author{}
-		scopes.AddToTopScope(Scope{
-			"name": func(blog *EntryData, scopes *Scopes, args Args) error {
-				blog.Author.Name = args.Next("author name")
-				return args.Finished()
-			},
-			"email": func(blog *EntryData, scopes *Scopes, args Args) error {
-				blog.Author.EMail = args.Next("author email")
-				return args.Finished()
-			},
-		})
+		scope["name"] = func(blog *EntryData, scope Scope, args Args) error {
+			blog.Author.Name = args.Next("author name")
+			return args.Finished()
+		}
+		scope["email"] = func(blog *EntryData, scope Scope, args Args) error {
+			blog.Author.EMail = args.Next("author email")
+			return args.Finished()
+		}
 		return args.Finished()
 	},
-	"tags": func(blog *EntryData, scopes *Scopes, args Args) error {
+	"tags": func(blog *EntryData, scope Scope, args Args) error {
 		tagStrs := strings.Split(args.Next("space separated tag list"), " ")
 		blog.Tags = make(Tags, len(tagStrs))
 		for i, t := range tagStrs {
@@ -209,7 +202,6 @@ func eval(blog *EntryData, scopes *Scopes, head *lex.LLHead) (nblog *EntryData, 
 		scopes.Push(beFuncs)
 	}
 	var fun BeFunc
-	//args := []string{}
 	for c := head.First; c != nil; c = c.Next {
 		n := c.El
 		switch n.Type {
@@ -225,16 +217,12 @@ func eval(blog *EntryData, scopes *Scopes, head *lex.LLHead) (nblog *EntryData, 
 			if err != nil {
 				return blog, err
 			}
-			err = fun(blog, scopes, NewArgs(c.Next))
+			err = fun(blog, scopes.Top(), NewArgs(c.Next))
 		case lex.TypeText:
 			log.Printf("unhandled: %#v", n)
-			//panic("type text invalid in this position")
-			//args = append(args, string(n.Text))
 		default:
 			panic(fmt.Errorf("unknown node type: %#v", n))
 		}
 	}
-	//err = fun(scopes, NewArgs(args...))
-	//return err
 	return blog, nil
 }
