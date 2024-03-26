@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
+	//"log"
 	"net/http"
 	"strings"
 
@@ -17,7 +17,7 @@ var pages Template = Template{template.New("")}
 
 func init() {
 	pages.Funcs(template.FuncMap{
-		"Evaluate": Evaluate,
+		"Render": Render,
 	})
 
 	template.Must(pages.Parse(HtmlCodeBlock))
@@ -66,17 +66,8 @@ func Handler(root *lex.LLHead) http.HandlerFunc {
 	}
 }
 
-func Evaluate(root *lex.LLHead) (template.HTML, error) {
-	data, err := eval(nil, nil, root)
-	if err != nil {
-		var zero template.HTML
-		return zero, err
-	}
-
-	buf := &bytes.Buffer{}
-	err = pages.Render(buf, "Entry", data) // name = ?
-	html := template.HTML(buf.String())
-	return html, err
+func Render(element ContentElement) (template.HTML, error) {
+	return element.Render()
 }
 
 type (
@@ -156,14 +147,15 @@ func (sc *Scopes) Resolve(name string) (fun BeFunc, err error) {
 
 var beFuncs = Scope {
 	"root": func(blog *EntryData, scope Scope, args Args) error {
+		// @todo: read defaults from config file?
 		blog.BlogName = "save-lisp-and-die"
 		blog.Author = Author{
 			Name: "cvl",
 		}
-
 		return args.Finished()
 	},
 	"eof": func(blog *EntryData, scope Scope, args Args) error {
+		// @todo: fill in blog.Meta ?
 		return args.Finished()
 	},
 	"title": func(blog *EntryData, scope Scope, args Args) error {
@@ -191,7 +183,29 @@ var beFuncs = Scope {
 		}
 		return args.Finished()
 	},
+	"body": func(blog *EntryData, scope Scope, args Args) error {
+		return args.Finished()
+	},
 }
+
+/*
+func eval(blog *EntryData, scopes *Scopes, node *lex.LLNode) (*EntryData, error) {
+	el := nodes.El
+	switch el.Type {
+	case lex.TypeAtom:
+		fun, err := scopes.Resolve(string(el.Atom))
+		if err != nil {
+			return blog, err
+		}
+		err = fun(blog, scopes.Top(), el.Next)
+		return blog, err
+	case lex.TypeForm:
+	case lex.TypeText:
+	default:
+		panic(fmt.Errorf("unknown node type: %#v", n))
+	}
+}
+*/
 
 func eval(blog *EntryData, scopes *Scopes, head *lex.LLHead) (nblog *EntryData, err error) {
 	if blog == nil {
@@ -205,7 +219,7 @@ func eval(blog *EntryData, scopes *Scopes, head *lex.LLHead) (nblog *EntryData, 
 	for c := head.First; c != nil; c = c.Next {
 		n := c.El
 		switch n.Type {
-		case lex.TypeForm: // evaluate recursively
+		case lex.TypeForm:
 			scopes.Push(Scope{})
 			blog, err = eval(blog, scopes, n.Form)
 			scopes.Pop()
@@ -218,8 +232,11 @@ func eval(blog *EntryData, scopes *Scopes, head *lex.LLHead) (nblog *EntryData, 
 				return blog, err
 			}
 			err = fun(blog, scopes.Top(), NewArgs(c.Next))
+			if err != nil {
+				return blog, err
+			}
 		case lex.TypeText:
-			log.Printf("unhandled: %#v", n)
+			blog.Content = append(blog.Content, Text(n.Text))
 		default:
 			panic(fmt.Errorf("unknown node type: %#v", n))
 		}

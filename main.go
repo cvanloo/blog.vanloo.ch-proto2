@@ -37,14 +37,20 @@ func main() {
 
 const testInput = `
 (author (name Colin van~Loo) (email I'm not going to tell you....))
+(title Reviewing the reMarkable)
 
 (tags reMarkable review technology proprietary)
+
+(body
 
 This is text. 
 This text will    be  joined with the previous line.  
 
 
 This however, is a new text element \(because there are two \(!\) newlines in-between\).
+)
+
+Text outside the body! What might happen to it?
 `
 
 const remarkableReviewBlogPostSource = `

@@ -3,7 +3,8 @@ package component
 import (
 	"fmt"
 	"time"
-	"be/lex"
+
+	//"be/lex"
 )
 
 type Tag string
@@ -82,7 +83,7 @@ type EntryData struct {
 	Meta Meta
 	Abstract string
 	Languages []Language
-	Content *lex.LLNode
+	Content []ContentElement
 }
 
 const HtmlEntry = `
@@ -164,15 +165,15 @@ const HtmlEntry = `
 					</li>
 				</ul>
 
-				{{ if .Content }}
-					{{ Evaluate .Content }}
+				{{ range .Content }}
+					{{ Render . }}
 				{{ end }}
 
 			</article>
 		</main>
 		<footer>
 			<p id="eof">STOP)))))</p>
-			<address>&copy; {{.Meta.CopyYear}} <a href="mailto:{{.Author.EMail}}">{{.Author.Name}}</a></address>
+			<address>&copy; {{.Meta.CopyYear}} <a href="mailto:{{.Author.EMail}}?subject=RE: {{.Title}}">{{.Author.Name}}</a></address>
 			<span class="credits">
 				<a href="/about.html#credits">Font Licenses</a>
 				<a href="/about.html">About</a>
