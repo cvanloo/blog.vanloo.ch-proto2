@@ -71,7 +71,7 @@ func Render(element ContentElement) (template.HTML, error) {
 }
 
 type (
-	BeFunc func(blog *EntryData, scope Scope, args Args) error
+	BeFunc func(blog *EntryData, scope Scope, args *Args) error
 	Scope map[string]BeFunc
 	Scopes struct {
 		scopes []Scope
@@ -83,13 +83,13 @@ type (
 	}
 )
 
-func NewArgs(args *lex.LLNode) Args {
-	return Args{
+func NewArgs(args *lex.LLNode) *Args {
+	return &Args{
 		next: args,
 	}
 }
 
-func (a Args) Next(name string) string {
+func (a *Args) Next(name string) string {
 	if a.finished {
 		panic("invalid usage: all mandatory arguments must appear before optional ones")
 	}
@@ -106,7 +106,7 @@ func (a Args) Next(name string) string {
 	return string(n.Text)
 }
 
-func (a Args) Optional(name string) string {
+func (a *Args) Optional(name string) string {
 	a.finished = true
 	if a.next == nil {
 		return ""
@@ -120,7 +120,7 @@ func (a Args) Optional(name string) string {
 	return string(n.Text)
 }
 
-func (a Args) Finished() error {
+func (a *Args) Finished() error {
 	return errors.Join(a.errs...)
 }
 
@@ -146,7 +146,7 @@ func (sc *Scopes) Resolve(name string) (fun BeFunc, err error) {
 }
 
 var beFuncs = Scope {
-	"root": func(blog *EntryData, scope Scope, args Args) error {
+	"root": func(blog *EntryData, scope Scope, args *Args) error {
 		// @todo: read defaults from config file?
 		blog.BlogName = "save-lisp-and-die"
 		blog.Author = Author{
@@ -154,28 +154,28 @@ var beFuncs = Scope {
 		}
 		return args.Finished()
 	},
-	"eof": func(blog *EntryData, scope Scope, args Args) error {
+	"eof": func(blog *EntryData, scope Scope, args *Args) error {
 		// @todo: fill in blog.Meta ?
 		return args.Finished()
 	},
-	"title": func(blog *EntryData, scope Scope, args Args) error {
+	"title": func(blog *EntryData, scope Scope, args *Args) error {
 		blog.Title = args.Next("title")
 		blog.AltTitle = args.Optional("alternative title")
 		return args.Finished()
 	},
-	"author": func(blog *EntryData, scope Scope, args Args) error {
+	"author": func(blog *EntryData, scope Scope, args *Args) error {
 		blog.Author = Author{}
-		scope["name"] = func(blog *EntryData, scope Scope, args Args) error {
+		scope["name"] = func(blog *EntryData, scope Scope, args *Args) error {
 			blog.Author.Name = args.Next("author name")
 			return args.Finished()
 		}
-		scope["email"] = func(blog *EntryData, scope Scope, args Args) error {
+		scope["email"] = func(blog *EntryData, scope Scope, args *Args) error {
 			blog.Author.EMail = args.Next("author email")
 			return args.Finished()
 		}
 		return args.Finished()
 	},
-	"tags": func(blog *EntryData, scope Scope, args Args) error {
+	"tags": func(blog *EntryData, scope Scope, args *Args) error {
 		tagStrs := strings.Split(args.Next("space separated tag list"), " ")
 		blog.Tags = make(Tags, len(tagStrs))
 		for i, t := range tagStrs {
@@ -183,7 +183,10 @@ var beFuncs = Scope {
 		}
 		return args.Finished()
 	},
-	"body": func(blog *EntryData, scope Scope, args Args) error {
+	"body": func(blog *EntryData, scope Scope, args *Args) error {
+		for a := args.Next("content"); a != ""; a = args.Optional("additional content") {
+			blog.Content = append(blog.Content, Text(a))
+		}
 		return args.Finished()
 	},
 }
@@ -236,7 +239,7 @@ func eval(blog *EntryData, scopes *Scopes, head *lex.LLHead) (nblog *EntryData, 
 				return blog, err
 			}
 		case lex.TypeText:
-			blog.Content = append(blog.Content, Text(n.Text))
+			//blog.Content = append(blog.Content, Text(n.Text))
 		default:
 			panic(fmt.Errorf("unknown node type: %#v", n))
 		}
