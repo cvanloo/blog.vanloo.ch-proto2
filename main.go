@@ -27,7 +27,7 @@ func main() {
 	root := lex.Lex(tokens)
 	fmt.Printf("%s\n", root)
 
-	fmt.Println(component.String(root.First))
+	fmt.Println(component.String(root))
 
 	//http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))
 	//http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
