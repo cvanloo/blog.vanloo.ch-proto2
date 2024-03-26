@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"maps"
 	"html/template"
 	"io"
+	"log"
+	"maps"
 	"net/http"
+	"strings"
 
 	"be/lex"
 )
@@ -38,14 +40,11 @@ func (t *Template) Render(w io.Writer, name string, data any) error {
 }
 
 func String(root *lex.LLHead) string {
-	scopes := &Scopes{}
-	scopes.Push(beFuncs)
-	/*blog, */err := eval(scopes, root)
-	name := "Entry"
-	data := blog
+	data, err := eval(nil, nil, root)
 	if err != nil {
 		panic(err)
 	}
+	name := "Entry"
 
 	bs := &bytes.Buffer{}
 	err = pages.Render(bs, name, data)
@@ -57,14 +56,11 @@ func String(root *lex.LLHead) string {
 
 func Handler(root *lex.LLHead) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		scopes := &Scopes{}
-		scopes.Push(beFuncs)
-		/*name, data, */err := eval(scopes, root)
-		name := "Entry"
-		data := blog
+		data, err := eval(nil, nil, root)
 		if err != nil {
 			panic(err)
 		}
+		name := "Entry"
 
 		err = pages.Render(w, name, data)
 		if err != nil {
@@ -76,47 +72,34 @@ func Handler(root *lex.LLHead) http.HandlerFunc {
 func Evaluate(root *lex.LLHead) (template.HTML, error) {
 	buf := bytes.NewBuffer([]byte{})
 
-	scopes := &Scopes{}
-	scopes.Push(beFuncs)
-	/*name, data, */err := eval(scopes, root)
-	name := "Entry"
-	data := blog
-
+	data, err := eval(nil, nil, root)
 	if err != nil {
 		var zero template.HTML
 		return zero, err
 	}
+	name := "Entry"
+
 	err = pages.Render(buf, name, data)
 	html := template.HTML(buf.String())
 	return html, err
 }
 
-var blog = EntryData{
-	// set defaults (@todo: read in from config file?)
-	BlogName: "save-lisp-and-die",
-	Author: Author{
-		Name: "cvl",
-		EMail: "",
-	},
-}
-
 type (
-	BeFunc func(scopes *Scopes, args Args) error
+	BeFunc func(blog *EntryData, scopes *Scopes, args Args) error
 	Scope map[string]BeFunc
 	Scopes struct {
 		scopes []Scope
 	}
 	Args struct {
-		args []string
-		next int
+		next *lex.LLNode
 		finished bool
 		errs []error
 	}
 )
 
-func NewArgs(args ...string) Args {
+func NewArgs(args *lex.LLNode) Args {
 	return Args{
-		args: args,
+		next: args,
 	}
 }
 
@@ -124,23 +107,31 @@ func (a Args) Next(name string) string {
 	if a.finished {
 		panic("invalid usage: all mandatory arguments must appear before optional ones")
 	}
-	if a.next < len(a.args) {
-		i := a.next
-		a.next++
-		return a.args[i]
+	if a.next == nil {
+		a.errs = append(a.errs, fmt.Errorf("missing argument: %s", name))
+		return "<value missing>"
 	}
-	a.errs = append(a.errs, fmt.Errorf("missing argument: %s", name))
-	return "<value missing>"
+	n := a.next.El
+	a.next = a.next.Next
+
+	if n.Type != lex.TypeText {
+		panic("arg must be of type text")
+	}
+	return string(n.Text)
 }
 
 func (a Args) Optional(name string) string {
 	a.finished = true
-	if a.next < len(a.args) {
-		i := a.next
-		a.next++
-		return a.args[i]
+	if a.next == nil {
+		return ""
 	}
-	return ""
+	n := a.next.El
+	a.next = a.next.Next
+
+	if n.Type != lex.TypeText {
+		panic("arg must be of type text")
+	}
+	return string(n.Text)
 }
 
 func (a Args) Finished() error {
@@ -169,56 +160,81 @@ func (sc *Scopes) Resolve(name string) (fun BeFunc, err error) {
 }
 
 var beFuncs = Scope {
-	"root": func(scopes *Scopes, args Args) error {
-		// @todo: default initialize blog based from config values here?
+	"root": func(blog *EntryData, scopes *Scopes, args Args) error {
+		blog.BlogName = "save-lisp-and-die"
+		blog.Author = Author{
+			Name: "cvl",
+		}
+
 		return args.Finished()
 	},
-	"title": func(scopes *Scopes, args Args) error {
+	"eof": func(blog *EntryData, scopes *Scopes, args Args) error {
+		return args.Finished()
+	},
+	"title": func(blog *EntryData, scopes *Scopes, args Args) error {
 		blog.Title = args.Next("title")
 		blog.AltTitle = args.Optional("alternative title")
 		return args.Finished()
 	},
-	"author": func(scopes *Scopes, args Args) error {
+	"author": func(blog *EntryData, scopes *Scopes, args Args) error {
 		blog.Author = Author{}
 		scopes.AddToTopScope(Scope{
-			"name": func(scopes *Scopes, args Args) error {
+			"name": func(blog *EntryData, scopes *Scopes, args Args) error {
 				blog.Author.Name = args.Next("author name")
 				return args.Finished()
 			},
-			"email": func(scopes *Scopes, args Args) error {
+			"email": func(blog *EntryData, scopes *Scopes, args Args) error {
 				blog.Author.EMail = args.Next("author email")
 				return args.Finished()
 			},
 		})
 		return args.Finished()
 	},
+	"tags": func(blog *EntryData, scopes *Scopes, args Args) error {
+		tagStrs := strings.Split(args.Next("space separated tag list"), " ")
+		blog.Tags = make(Tags, len(tagStrs))
+		for i, t := range tagStrs {
+			blog.Tags[i] = Tag(t)
+		}
+		return args.Finished()
+	},
 }
 
-// scopes := Scopes{beFuncs}
-func eval(scopes *Scopes, head *lex.LLHead) (err error) {
+func eval(blog *EntryData, scopes *Scopes, head *lex.LLHead) (nblog *EntryData, err error) {
+	if blog == nil {
+		blog = &EntryData{}
+	}
+	if scopes == nil {
+		scopes = &Scopes{}
+		scopes.Push(beFuncs)
+	}
 	var fun BeFunc
-	args := []string{}
+	//args := []string{}
 	for c := head.First; c != nil; c = c.Next {
 		n := c.El
 		switch n.Type {
 		case lex.TypeForm: // evaluate recursively
 			scopes.Push(Scope{})
-			err = eval(scopes, n.Form)
+			blog, err = eval(blog, scopes, n.Form)
 			scopes.Pop()
 			if err != nil {
-				return err
+				return blog, err
 			}
 		case lex.TypeAtom:
 			fun, err = scopes.Resolve(string(n.Atom))
 			if err != nil {
-				return err
+				return blog, err
 			}
+			err = fun(blog, scopes, NewArgs(c.Next))
 		case lex.TypeText:
-			args = append(args, string(n.Text))
+			log.Printf("unhandled: %#v", n)
+			//panic("type text invalid in this position")
+			//args = append(args, string(n.Text))
 		default:
 			panic(fmt.Errorf("unknown node type: %#v", n))
 		}
 	}
-	err = fun(scopes, NewArgs(args...))
-	return err
+	//err = fun(scopes, NewArgs(args...))
+	//return err
+	return blog, nil
 }

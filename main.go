@@ -38,6 +38,8 @@ func main() {
 const testInput = `
 (author (name Colin van~Loo) (email I'm not going to tell you....))
 
+(tags reMarkable review technology proprietary)
+
 This is text. 
 This text will    be  joined with the previous line.  
 
