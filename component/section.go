@@ -165,24 +165,33 @@ const HtmlAside = `
 {{ end }}
 `
 
-type Comment struct {
+type Comment string
+
+var _ ContentElement = (*Comment)(nil)
+
+func (c Comment) Render() (template.HTML, error) {
+	return template.HTML("<!-- " + string(c) + " -->"), nil
+}
+
+type ActualComment struct {
 	Content []ContentElement
 }
 
-var _ Renderable = (*Comment)(nil)
+var _ Renderable = (*ActualComment)(nil)
 
-func (c *Comment) Render() (template.HTML, error) {
+func (c *ActualComment) Render() (template.HTML, error) {
+	// @fixme: well then, ... we could just skip the rendering right away...
 	buf := &bytes.Buffer{}
-	err := pages.Render(buf, "Comment", c)
+	err := pages.Render(buf, "ActualComment", c)
 	return template.HTML(buf.String()), err
 }
 
-func (c *Comment) Append(child ContentElement) {
+func (c *ActualComment) Append(child ContentElement) {
 	c.Content = append(c.Content, child)
 }
 
-const HtmlComment = `
-{{ define "Comment" }}
+const HtmlActualComment = `
+{{ define "ActualComment" }}
 <!--
 {{ range .Content }}
 	{{ Render . }}

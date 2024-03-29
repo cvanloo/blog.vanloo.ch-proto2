@@ -174,8 +174,17 @@ var rootFuns = FunMap {
 		}
 		return args.Finished()
 	},
+	"comment": func(blog *Blog, scopes *Scopes, args *Args) error {
+		content, err := args.Next("comment text", TypeText)
+		if err != nil {
+			return fmt.Errorf("comment: %w", err)
+		}
+		comment := component.Comment(content.Text)
+		scopes.Parent().Append(comment)
+		return args.Finished()
+	},
 	"html-comment": func(blog *Blog, scopes *Scopes, args *Args) error {
-		comment := &component.Comment{}
+		comment := &component.ActualComment{}
 		scopes.Parent().Append(comment)
 		for !args.IsFinished() {
 			content, err := args.Optional("html-comment content", TypeAny)
