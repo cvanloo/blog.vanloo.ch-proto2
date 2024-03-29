@@ -23,8 +23,9 @@ func main() {
 	blog := &Blog{}
 	scopes := &Scopes{}
 	scopes.Push(rootFuns)
-	Eval(blog, scopes, NewArgs(root.First))
+	err := Eval(blog, scopes, NewArgs(root.First))
 	fmt.Println(component.String(blog))
+	fmt.Println(err)
 
 	//http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))
 	//http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))

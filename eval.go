@@ -207,6 +207,7 @@ func Eval(blog *Blog, scopes *Scopes, args *Args) error {
 		}
 		return fun(blog, scopes, args)
 	case TypeForm:
+		// @fixme: doesn't work (here)!
 		scopes.Push(Scope{})
 		defer scopes.Pop()
 		return Eval(blog, scopes, NewArgs(arg.Form.First))
