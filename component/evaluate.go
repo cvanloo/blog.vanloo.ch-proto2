@@ -7,7 +7,7 @@ import (
 	"html/template"
 	"io"
 	//"log"
-	//"net/http"
+	"net/http"
 	//"strings"
 
 	//"be/lex"
@@ -47,21 +47,14 @@ func String(blog *EntryData) string {
 	return bs.String()
 }
 
-/*
-func Handler(root *lex.LLHead) http.HandlerFunc {
+func Handler(blog *EntryData) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := eval(nil, nil, root.First)
-		if err != nil {
-			panic(err)
-		}
-
-		err = pages.Render(w, "Entry", data)
+		err := pages.Render(w, "Entry", blog)
 		if err != nil {
 			panic(err)
 		}
 	}
 }
-*/
 
 func Render(element ContentElement) (template.HTML, error) {
 	return element.Render()

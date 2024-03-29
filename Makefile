@@ -1,4 +1,14 @@
-.PHONY: all
+.PHONY: all serve
 
-all:
-	go run .
+default: all
+
+SOURCES := $(shell find . -name '*.go')
+
+be: $(SOURCES)
+	go build .
+
+all: be
+	./be
+
+serve: be
+	./be -serve=true

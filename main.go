@@ -1,13 +1,20 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	//"net/http"
+	"net/http"
 
 	"be/component"
-	"be/tok"
 	"be/lex"
+	"be/tok"
 )
+
+var shouldServe = flag.Bool("serve", false, "serve generated output on :8080")
+
+func init() {
+	flag.Parse()
+}
 
 func main() {
 	tokenizer := tok.NewTokenizer([]rune(testInput2))
@@ -29,10 +36,12 @@ func main() {
 		fmt.Println(err)
 	}
 
-	//http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))
-	//http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
-	//http.HandleFunc("/", component.Handler(root.First))
-	//http.ListenAndServe(":8080", nil)
+	if *shouldServe {
+		http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))
+		http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
+		http.HandleFunc("/", component.Handler(blog))
+		http.ListenAndServe(":8080", nil)
+	}
 }
 
 const testInput2 = `
