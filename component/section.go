@@ -17,7 +17,7 @@ func GenerateID(name string) (id string) {
 		} else if r == ' ' {
 			id += "-"
 		} else if 'A' <= r && r <= 'Z' {
-			id += string(r + ('a' - 'A'))
+			id += string(r + ('a' - 'A')) // to lower case
 		} else {
 			id += "_"
 		}
@@ -33,9 +33,15 @@ func GenerateID(name string) (id string) {
 	return id + ext
 }
 
-type ContentElement interface {
-	Render() (template.HTML, error)
-}
+type (
+	ContentElement interface {
+		Render() (template.HTML, error)
+	}
+	Renderable interface {
+		ContentElement
+		Append(child ContentElement)
+	}
+)
 
 type (
 	Section struct {
@@ -52,7 +58,7 @@ const (
 	SectionLevelSubsection
 )
 
-var _ ContentElement = (*Section)(nil)
+var _ Renderable = (*Section)(nil)
 
 func NewSection(title string) *Section {
 	return &Section{
@@ -72,7 +78,7 @@ func NewSubsection(title string) *Section {
 	}
 }
 
-func (s Section) Render() (template.HTML, error) {
+func (s *Section) Render() (template.HTML, error) {
 	buf := &bytes.Buffer{}
 	templName := "Section"
 	switch s.Level {
@@ -84,6 +90,10 @@ func (s Section) Render() (template.HTML, error) {
 	}
 	err := pages.Render(buf, templName, s)
 	return template.HTML(buf.String()), err
+}
+
+func (s *Section) Append(child ContentElement) {
+	s.Content = append(s.Content, child)
 }
 
 const HtmlSection = `
@@ -155,3 +165,28 @@ const HtmlAside = `
 {{ end }}
 `
 
+type Comment struct {
+	Content []ContentElement
+}
+
+var _ Renderable = (*Comment)(nil)
+
+func (c *Comment) Render() (template.HTML, error) {
+	buf := &bytes.Buffer{}
+	err := pages.Render(buf, "Comment", c)
+	return template.HTML(buf.String()), err
+}
+
+func (c *Comment) Append(child ContentElement) {
+	c.Content = append(c.Content, child)
+}
+
+const HtmlComment = `
+{{ define "Comment" }}
+<!--
+{{ range .Content }}
+	{{ Render . }}
+{{ end }}
+-->
+{{ end }}
+`

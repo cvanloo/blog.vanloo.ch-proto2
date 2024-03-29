@@ -28,9 +28,9 @@ func main() {
 	fmt.Printf("%s\n", root)
 
 	blog := &Blog{}
-	scopes := &Scopes{}
-	scopes.Push(rootFuns)
+	scopes := InitScopes(blog)
 	err := Eval(blog, scopes, NewArgs(root.First))
+	fmt.Printf("%#v\n", blog)
 	fmt.Println(component.String(blog))
 	if err != nil {
 		fmt.Println(err)
@@ -45,9 +45,10 @@ func main() {
 }
 
 const testInput2 = `
-(author (name Colin van Loo) (email contact@vanloo.ch))
+(author (name Colin van~Loo) (email contact@vanloo.ch))
 (title Reviewing the reMarkable)
 (tags reMarkable review proprietary technology)
+
 (body
 
 (section The good parts
@@ -60,6 +61,8 @@ The reMarkable is handy, light-weight, and has lots of storage for my notes.
 No more difficult to search through piles of paper up to the ceiling.
 Tagging notebooks and single pages within a notebook makes them easily discoverable.
 
+(html-comment test)
+
 (subsection It runs Linux
 
 I did not want to end on a negative note, so I kept the best part for last:
@@ -69,6 +72,7 @@ When plugged into a computer, the reMarkable automatically opens an SSH port.
 It takes a bit of rummaging through settings to find the IP address\(es\) and root password.
 )
 )
+
 )
 `
 

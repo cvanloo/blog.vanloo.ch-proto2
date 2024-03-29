@@ -1,8 +1,10 @@
 package component
 
 import (
+	"bytes"
 	"fmt"
 	"time"
+	"html/template"
 
 	//"be/lex"
 )
@@ -84,6 +86,18 @@ type EntryData struct {
 	Abstract string
 	Languages []Language
 	Content []ContentElement
+}
+
+var _ Renderable = (*EntryData)(nil)
+
+func (blog *EntryData) Render() (template.HTML, error) {
+	buf := &bytes.Buffer{}
+	err := pages.Render(buf, "Entry", blog)
+	return template.HTML(buf.String()), err
+}
+
+func (blog *EntryData) Append(child ContentElement) {
+	blog.Content = append(blog.Content, child)
 }
 
 const HtmlEntry = `
@@ -173,7 +187,7 @@ const HtmlEntry = `
 		</main>
 		<footer>
 			<p id="eof">STOP)))))</p>
-			<address>&copy; {{.Meta.CopyYear}} <a href="mailto:{{.Author.EMail}}?subject=RE: {{.Title}}">{{.Author.Name}}</a></address>
+			<address>&copy; {{.Meta.CopyYear}} <a href="mailto:{{.Author.EMail}}?subject=RE:%20{{.Title}}">{{.Author.Name}}</a></address>
 			<span class="credits">
 				<a href="/about.html#credits">Font Licenses</a>
 				<a href="/about.html">About</a>

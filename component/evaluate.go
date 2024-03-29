@@ -28,6 +28,7 @@ func init() {
 	template.Must(pages.Parse(HtmlLink))
 	template.Must(pages.Parse(HtmlAside))
 	template.Must(pages.Parse(HtmlSidenote))
+	template.Must(pages.Parse(HtmlComment))
 }
 
 type Template struct {

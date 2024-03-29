@@ -22,10 +22,18 @@ type (
 	LLNode = lex.LLNode
 	Node = lex.Node
 	Blog = component.EntryData
+	Renderable = component.Renderable
 )
 
 type (
-	Scope map[string]beFun
+	FunMap map[string]beFun
+	Context struct {
+		Parent Renderable
+	}
+	Scope struct {
+		funs FunMap
+		Context *Context
+	}
 	Scopes struct {
 		scopes []Scope
 	}
@@ -36,6 +44,28 @@ type (
 	}
 	beFun func(blog *Blog, scopes *Scopes, args *Args) error
 )
+
+func NewScope(parent Renderable) Scope {
+	return Scope{
+		funs: FunMap{},
+		Context: &Context{
+			Parent: parent,
+		},
+	}
+}
+
+func InitScopes(blog *Blog) *Scopes {
+	return &Scopes{
+		scopes: []Scope{
+			Scope{
+				funs: rootFuns,
+				Context: &Context{
+					Parent: blog,
+				},
+			},
+		},
+	}
+}
 
 func (s *Scopes) Push(scope Scope) {
 	s.scopes = append(s.scopes, scope)
@@ -50,16 +80,20 @@ func (s *Scopes) Top() Scope {
 }
 
 func (s *Scopes) RegisterFun(name string, fun beFun) {
-	s.Top()[name] = fun
+	s.Top().funs[name] = fun
 }
 
 func (s *Scopes) Resolve(name string) (beFun, error) {
 	for i := len(s.scopes)-1; i >= 0; i-- {
-		if fun, ok := s.scopes[i][name]; ok {
+		if fun, ok := s.scopes[i].funs[name]; ok {
 			return fun, nil
 		}
 	}
 	return nil, fmt.Errorf("function not in scope: %s", name)
+}
+
+func (s *Scopes) Parent() Renderable {
+	return s.Top().Context.Parent
 }
 
 func NewArgs(node *LLNode) *Args {
@@ -105,7 +139,7 @@ func (a *Args) Finished() error {
 	return nil
 }
 
-var rootFuns = Scope {
+var rootFuns = FunMap {
 	"root": func(blog *Blog, scopes *Scopes, args *Args) error {
 		// @todo: read defaults from config file?
 		blog.BlogName = "save-lisp-and-die"
@@ -118,7 +152,7 @@ var rootFuns = Scope {
 				return fmt.Errorf("root: %w", err)
 			}
 			log.Printf("nextArgs: %#v, %#v", nextArgs, nextArgs.Form.First.El)
-			scopes.Push(Scope{})
+			scopes.Push(NewScope(blog))
 			err = Eval(blog, scopes, NewArgs(nextArgs.Form.First))
 			scopes.Pop()
 			if err != nil {
@@ -137,6 +171,29 @@ var rootFuns = Scope {
 			//Revisions []time.Time
 			//Topic string
 			//EstReadingTime ReadingTime
+		}
+		return args.Finished()
+	},
+	"html-comment": func(blog *Blog, scopes *Scopes, args *Args) error {
+		comment := &component.Comment{}
+		scopes.Parent().Append(comment)
+		for !args.IsFinished() {
+			content, err := args.Optional("html-comment content", TypeAny)
+			if err != nil {
+				return fmt.Errorf("html-comment: %w", err)
+			}
+			if content.Type == TypeText {
+				comment.Content = append(comment.Content, component.Text(content.Text))
+			} else if content.Type == TypeForm {
+				scopes.Push(NewScope(comment))
+				err := Eval(blog, scopes, NewArgs(content.Form.First))
+				scopes.Pop()
+				if err != nil {
+					return fmt.Errorf("html-comment: %w", err)
+				}
+			} else {
+				return fmt.Errorf("html-comment: unhandled argument type: %#v", content)
+			}
 		}
 		return args.Finished()
 	},
@@ -209,7 +266,7 @@ var rootFuns = Scope {
 			if content.Type == TypeText {
 				blog.Content = append(blog.Content, component.Text(content.Text))
 			} else if content.Type == TypeForm {
-				scopes.Push(Scope{})
+				scopes.Push(NewScope(blog))
 				err := Eval(blog, scopes, NewArgs(content.Form.First))
 				scopes.Pop()
 				if err != nil {
@@ -244,7 +301,7 @@ var rootFuns = Scope {
 				if content.Type == TypeText {
 					subsection.Content = append(subsection.Content, component.Text(content.Text))
 				} else if content.Type == TypeForm {
-					scopes.Push(Scope{})
+					scopes.Push(NewScope(subsection))
 					err := Eval(blog, scopes, NewArgs(content.Form.First))
 					scopes.Pop()
 					if err != nil {
@@ -264,7 +321,7 @@ var rootFuns = Scope {
 			if content.Type == TypeText {
 				section.Content = append(section.Content, component.Text(content.Text))
 			} else if content.Type == TypeForm {
-				scopes.Push(Scope{})
+				scopes.Push(NewScope(section))
 				err := Eval(blog, scopes, NewArgs(content.Form.First))
 				scopes.Pop()
 				if err != nil {
