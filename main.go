@@ -25,7 +25,9 @@ func main() {
 	scopes.Push(rootFuns)
 	err := Eval(blog, scopes, NewArgs(root.First))
 	fmt.Println(component.String(blog))
-	fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	//http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))
 	//http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
@@ -37,7 +39,9 @@ const testInput2 = `
 (author (name Colin van Loo) (email contact@vanloo.ch))
 (title Welcome to my Blog!)
 (tags review proprietary reMarkable technology)
+(body
 This is text.
+)
 `
 
 const testInput = `

@@ -193,7 +193,15 @@ var rootFuns = Scope {
 	},
 	"body": func(blog *Blog, scopes *Scopes, args *Args) error {
 		for !args.IsFinished() {
-			_, _ = args.Optional("body content", TypeAny)
+			content, err := args.Optional("body content", TypeAny)
+			if err != nil {
+				return fmt.Errorf("body: %w", err)
+			}
+			if content.Type == TypeText {
+				blog.Content = append(blog.Content, component.Text(content.Text))
+			} else {
+				return fmt.Errorf("body: unhandled argument type: %#v", content)
+			}
 		}
 		return args.Finished()
 	},
