@@ -36,6 +36,28 @@ const (
 	TypeText FormType = 1 << 2
 )
 
+func (t FormType) String() (str string) {
+	if (t & TypeForm) != 0 {
+		str += "Form"
+	}
+	if (t & TypeAtom) != 0 {
+		if len(str) > 0 {
+			str += " | "
+		}
+		str += "Atom"
+	}
+	if (t & TypeText) != 0 {
+		if len(str) > 0 {
+			str += " | "
+		}
+		str += "Text"
+	}
+	if len(str) > 0 {
+		return str
+	}
+	return "None"
+}
+
 type LLHead struct {
 	First, Last *LLNode
 }

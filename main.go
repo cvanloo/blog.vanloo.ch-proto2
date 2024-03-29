@@ -30,10 +30,10 @@ func main() {
 	blog := &Blog{}
 	scopes := InitScopes(blog)
 	err := Eval(blog, scopes, NewArgs(root.First))
-	fmt.Printf("%#v\n", blog)
+	fmt.Printf("%+v\n", blog)
 	fmt.Println(component.String(blog))
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("%+v\n", err)
 	}
 
 	if *shouldServe {
@@ -61,7 +61,7 @@ The reMarkable is handy, light-weight, and has lots of storage for my notes.
 No more difficult to search through piles of paper up to the ceiling.
 Tagging notebooks and single pages within a notebook makes them easily discoverable.
 
-(html-comment test)
+(comment (section test))
 
 (subsection It runs Linux
 

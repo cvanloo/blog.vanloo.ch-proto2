@@ -110,7 +110,7 @@ func (a *Args) Next(name string, type_ lex.FormType) (*Arg, error) {
 	arg := a.next.El
 	a.next = a.next.Next
 	if (arg.Type & type_) == 0 {
-		return arg, fmt.Errorf("argument of incorrect type, want: %#v, got: %#v", type_, arg)
+		return arg, fmt.Errorf("argument of incorrect type, want: %+v, got: %+v", type_, arg)
 	}
 	return arg, nil
 }
@@ -123,7 +123,7 @@ func (a *Args) Optional(name string, type_ lex.FormType) (*Arg, error) {
 	arg := a.next.El
 	a.next = a.next.Next
 	if (arg.Type & type_) == 0 {
-		return arg, fmt.Errorf("argument of incorrect type, want: %#v, got: %#v", type_, arg)
+		return arg, fmt.Errorf("argument of incorrect type, want: %+v, got: %+v", type_, arg)
 	}
 	return arg, nil
 }
@@ -134,7 +134,7 @@ func (a *Args) IsFinished() bool {
 
 func (a *Args) Finished() error {
 	if !a.IsFinished() {
-		return fmt.Errorf("superfluous arguments: %#v", a.next)
+		return fmt.Errorf("superfluous arguments: %+v", a.next)
 	}
 	return nil
 }
@@ -151,7 +151,7 @@ var rootFuns = FunMap {
 			if err != nil {
 				return fmt.Errorf("root: %w", err)
 			}
-			log.Printf("nextArgs: %#v, %#v", nextArgs, nextArgs.Form.First.El)
+			log.Printf("nextArgs: %+v, %+v", nextArgs, nextArgs.Form.First.El)
 			scopes.Push(NewScope(blog))
 			err = Eval(blog, scopes, NewArgs(nextArgs.Form.First))
 			scopes.Pop()
@@ -201,7 +201,7 @@ var rootFuns = FunMap {
 					return fmt.Errorf("html-comment: %w", err)
 				}
 			} else {
-				return fmt.Errorf("html-comment: unhandled argument type: %#v", content)
+				return fmt.Errorf("html-comment: unhandled argument type: %+v", content)
 			}
 		}
 		return args.Finished()
@@ -282,7 +282,7 @@ var rootFuns = FunMap {
 					return fmt.Errorf("body: %w", err)
 				}
 			} else {
-				return fmt.Errorf("body: unhandled argument type: %#v", content)
+				return fmt.Errorf("body: unhandled argument type: %+v", content)
 			}
 		}
 		return args.Finished()
@@ -317,7 +317,7 @@ var rootFuns = FunMap {
 						return fmt.Errorf("subsection: %w", err)
 					}
 				} else {
-					return fmt.Errorf("subsection: unhandled argument type: %#v", content)
+					return fmt.Errorf("subsection: unhandled argument type: %+v", content)
 				}
 			}
 			return args.Finished()
@@ -337,7 +337,7 @@ var rootFuns = FunMap {
 					return fmt.Errorf("section: %w", err)
 				}
 			} else {
-				return fmt.Errorf("section: unhandled argument type: %#v", content)
+				return fmt.Errorf("section: unhandled argument type: %+v", content)
 			}
 		}
 		return args.Finished()
