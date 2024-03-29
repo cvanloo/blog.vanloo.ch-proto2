@@ -174,22 +174,22 @@ var rootFuns = FunMap {
 		}
 		return args.Finished()
 	},
-	"comment": func(blog *Blog, scopes *Scopes, args *Args) error {
-		content, err := args.Next("comment text", TypeText)
+	"html-comment": func(blog *Blog, scopes *Scopes, args *Args) error {
+		content, err := args.Next("html-comment text", TypeText)
 		if err != nil {
-			return fmt.Errorf("comment: %w", err)
+			return fmt.Errorf("html-comment: %w", err)
 		}
 		comment := component.Comment(content.Text)
 		scopes.Parent().Append(comment)
 		return args.Finished()
 	},
-	"html-comment": func(blog *Blog, scopes *Scopes, args *Args) error {
+	"comment": func(blog *Blog, scopes *Scopes, args *Args) error {
 		comment := &component.ActualComment{}
 		scopes.Parent().Append(comment)
 		for !args.IsFinished() {
-			content, err := args.Optional("html-comment content", TypeAny)
+			content, err := args.Optional("comment content", TypeAny)
 			if err != nil {
-				return fmt.Errorf("html-comment: %w", err)
+				return fmt.Errorf("comment: %w", err)
 			}
 			if content.Type == TypeText {
 				comment.Content = append(comment.Content, component.Text(content.Text))
@@ -198,10 +198,10 @@ var rootFuns = FunMap {
 				err := Eval(blog, scopes, NewArgs(content.Form.First))
 				scopes.Pop()
 				if err != nil {
-					return fmt.Errorf("html-comment: %w", err)
+					return fmt.Errorf("comment: %w", err)
 				}
 			} else {
-				return fmt.Errorf("html-comment: unhandled argument type: %+v", content)
+				return fmt.Errorf("comment: unhandled argument type: %+v", content)
 			}
 		}
 		return args.Finished()

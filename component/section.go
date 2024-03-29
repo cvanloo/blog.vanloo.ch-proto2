@@ -170,6 +170,7 @@ type Comment string
 var _ ContentElement = (*Comment)(nil)
 
 func (c Comment) Render() (template.HTML, error) {
+	// ExecuteTemplate would remove the entire thing from the output; don't call it
 	return template.HTML("<!-- " + string(c) + " -->"), nil
 }
 

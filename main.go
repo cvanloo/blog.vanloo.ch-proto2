@@ -61,7 +61,7 @@ The reMarkable is handy, light-weight, and has lots of storage for my notes.
 No more difficult to search through piles of paper up to the ceiling.
 Tagging notebooks and single pages within a notebook makes them easily discoverable.
 
-(comment (section test))
+(html-comment This will appear in the html output as a comment)
 
 (subsection It runs Linux
 
