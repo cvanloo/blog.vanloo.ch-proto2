@@ -16,7 +16,7 @@ func (t Tag) String() string {
 type Tags []Tag
 
 func (ts Tags) KeywordList() (s string) {
-	if ts == nil {
+	if ts == nil || len(ts) == 0 {
 		return ""
 	}
 	s = string(ts[0])

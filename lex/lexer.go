@@ -31,9 +31,9 @@ import (
 
 type FormType int
 const (
-	TypeForm FormType = iota
-	TypeAtom
-	TypeText
+	TypeForm FormType = 1 << 0
+	TypeAtom FormType = 1 << 1
+	TypeText FormType = 1 << 2
 )
 
 type LLHead struct {

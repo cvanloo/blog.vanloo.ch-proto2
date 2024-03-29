@@ -9,17 +9,10 @@ import (
 	"be/lex"
 )
 
-func panicIf[T any](t T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return t
-}
-
 func main() {
-	tokenizer := tok.NewTokenizer([]rune(testInput))
+	tokenizer := tok.NewTokenizer([]rune(testInput2))
 	//tokenizer := tok.NewTokenizer([]rune(remarkableReviewBlogPostSource))
-	tokens := panicIf(tokenizer.Tokenize())
+	tokens := must(tokenizer.Tokenize())
 	for _, t := range tokens {
 		fmt.Println(t)
 	}
@@ -27,13 +20,24 @@ func main() {
 	root := lex.Lex(tokens)
 	fmt.Printf("%s\n", root)
 
-	fmt.Println(component.String(root))
+	blog := &Blog{}
+	scopes := &Scopes{}
+	scopes.Push(rootFuns)
+	Eval(blog, scopes, NewArgs(root.First))
+	fmt.Println(component.String(blog))
 
 	//http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))
 	//http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 	//http.HandleFunc("/", component.Handler(root.First))
 	//http.ListenAndServe(":8080", nil)
 }
+
+const testInput2 = `
+(author (name Colin van Loo) (email contact@vanloo.ch))
+(title Welcome to my Blog!)
+(tags review proprietary reMarkable technology)
+This is text.
+`
 
 const testInput = `
 (author (name Colin van~Loo) (email I'm not going to tell you....))
