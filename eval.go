@@ -118,7 +118,12 @@ var rootFuns = Scope {
 				return fmt.Errorf("root: %w", err)
 			}
 			log.Printf("nextArgs: %#v, %#v", nextArgs, nextArgs.Form.First.El)
-			panicIf(Eval(blog, scopes, NewArgs(nextArgs.Form.First)))
+			scopes.Push(Scope{})
+			err = Eval(blog, scopes, NewArgs(nextArgs.Form.First))
+			scopes.Pop()
+			if err != nil {
+				return err
+			}
 		}
 		return args.Finished()
 	},
@@ -207,10 +212,11 @@ func Eval(blog *Blog, scopes *Scopes, args *Args) error {
 		}
 		return fun(blog, scopes, args)
 	case TypeForm:
+		assert(false, "@todo: unhandled")
 		// @fixme: doesn't work (here)!
-		scopes.Push(Scope{})
-		defer scopes.Pop()
-		return Eval(blog, scopes, NewArgs(arg.Form.First))
+		//scopes.Push(Scope{})
+		//defer scopes.Pop()
+		//return Eval(blog, scopes, NewArgs(arg.Form.First))
 	case TypeText:
 		assert(false, "@todo: unhandled")
 	default:
