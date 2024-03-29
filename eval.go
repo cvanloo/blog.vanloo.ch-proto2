@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"log"
+	"strings"
+	"time"
 
-	"be/lex"
-	//"be/tok"
 	"be/component"
+	"be/lex"
 )
 
 const (
@@ -63,9 +63,9 @@ func (s *Scopes) Resolve(name string) (beFun, error) {
 }
 
 func NewArgs(node *LLNode) *Args {
-    return &Args{
-        next: node,
-    }
+	return &Args{
+		next: node,
+	}
 }
 
 func (a *Args) Next(name string, type_ lex.FormType) (*Arg, error) {
@@ -129,6 +129,15 @@ var rootFuns = Scope {
 	},
 	"eof": func(blog *Blog, scopes *Scopes, args *Args) error {
 		// @todo: fill in blog.Meta?
+		blog.Meta = component.Meta{
+			Language: "en",
+			//CanonicalURL string
+			//Description string
+			Published: time.Now(),
+			//Revisions []time.Time
+			//Topic string
+			//EstReadingTime ReadingTime
+		}
 		return args.Finished()
 	},
 	"title": func(blog *Blog, scopes *Scopes, args *Args) error {
@@ -199,8 +208,70 @@ var rootFuns = Scope {
 			}
 			if content.Type == TypeText {
 				blog.Content = append(blog.Content, component.Text(content.Text))
+			} else if content.Type == TypeForm {
+				scopes.Push(Scope{})
+				err := Eval(blog, scopes, NewArgs(content.Form.First))
+				scopes.Pop()
+				if err != nil {
+					return fmt.Errorf("body: %w", err)
+				}
 			} else {
 				return fmt.Errorf("body: unhandled argument type: %#v", content)
+			}
+		}
+		return args.Finished()
+	},
+	"section": func(blog *Blog, scopes *Scopes, args *Args) error {
+		heading, err := args.Next("section heading", TypeText)
+		if err != nil {
+			return fmt.Errorf("section: %w", err)
+		}
+		section := component.NewSection(string(heading.Text))
+		blog.Content = append(blog.Content, section)
+		scopes.RegisterFun("subsection", func(blog *Blog, scopes *Scopes, args *Args) error {
+			heading, err := args.Next("subsection heading", TypeText)
+			if err != nil {
+				return fmt.Errorf("subsection: %w", err)
+			}
+			subsection := component.NewSubsection(string(heading.Text))
+			section.Content = append(section.Content, subsection)
+			// if there were a subsubsection, the function would have to be registered here
+			for !args.IsFinished() {
+				content, err := args.Optional("subsection content", TypeAny)
+				if err != nil {
+					return fmt.Errorf("subsection: %w", err)
+				}
+				if content.Type == TypeText {
+					subsection.Content = append(subsection.Content, component.Text(content.Text))
+				} else if content.Type == TypeForm {
+					scopes.Push(Scope{})
+					err := Eval(blog, scopes, NewArgs(content.Form.First))
+					scopes.Pop()
+					if err != nil {
+						return fmt.Errorf("subsection: %w", err)
+					}
+				} else {
+					return fmt.Errorf("subsection: unhandled argument type: %#v", content)
+				}
+			}
+			return args.Finished()
+		})
+		for !args.IsFinished() {
+			content, err := args.Optional("section content", TypeAny)
+			if err != nil {
+				return fmt.Errorf("section: %w", err)
+			}
+			if content.Type == TypeText {
+				section.Content = append(section.Content, component.Text(content.Text))
+			} else if content.Type == TypeForm {
+				scopes.Push(Scope{})
+				err := Eval(blog, scopes, NewArgs(content.Form.First))
+				scopes.Pop()
+				if err != nil {
+					return fmt.Errorf("section: %w", err)
+				}
+			} else {
+				return fmt.Errorf("section: unhandled argument type: %#v", content)
 			}
 		}
 		return args.Finished()

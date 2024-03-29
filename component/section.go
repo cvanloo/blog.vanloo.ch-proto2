@@ -2,32 +2,84 @@ package component
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 
 	//"be/lex"
 )
 
+var generatedIDs = map[string]struct{}{}
+
+func GenerateID(name string) (id string) {
+	for _, r := range name {
+		if 'a' <= r && r <= 'z' {
+			id += string(r)
+		} else if r == ' ' {
+			id += "-"
+		} else if 'A' <= r && r <= 'Z' {
+			id += string(r + ('a' - 'A'))
+		} else {
+			id += "_"
+		}
+	}
+	n, alreadyExists, ext := 1, true, ""
+	for alreadyExists {
+		if _, alreadyExists = generatedIDs[id + ext]; alreadyExists {
+			ext = fmt.Sprintf("-%d", n)
+			n++
+		}
+	}
+	generatedIDs[id + ext] = struct{}{}
+	return id + ext
+}
+
 type ContentElement interface {
 	Render() (template.HTML, error)
 }
 
-type Section struct {
-	ID string
-	Title string
-	Content []ContentElement
-	Level int
-}
+type (
+	Section struct {
+		ID string
+		Title string
+		Content []ContentElement
+		Level SectionLevel
+	}
+	SectionLevel int
+)
+
+const (
+	SectionLevelSection SectionLevel = iota
+	SectionLevelSubsection
+)
 
 var _ ContentElement = (*Section)(nil)
+
+func NewSection(title string) *Section {
+	return &Section{
+		ID: GenerateID(title),
+		Title: title,
+		Content: []ContentElement{},
+		Level: SectionLevelSection,
+	}
+}
+
+func NewSubsection(title string) *Section {
+	return &Section{
+		ID: GenerateID(title),
+		Title: title,
+		Content: []ContentElement{},
+		Level: SectionLevelSubsection,
+	}
+}
 
 func (s Section) Render() (template.HTML, error) {
 	buf := &bytes.Buffer{}
 	templName := "Section"
 	switch s.Level {
-	case 0:
+	case SectionLevelSection:
 		templName = "Section"
 	default: fallthrough
-	case 1:
+	case SectionLevelSubsection:
 		templName = "Subsection"
 	}
 	err := pages.Render(buf, templName, s)

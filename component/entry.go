@@ -113,7 +113,7 @@ const HtmlEntry = `
 
 		<meta name="og:title" content="{{.Title}}"/>
 		<meta name="og:type" content="article"/>
-		<meta property="article:published_time" content="{{.Meta.Published}}" />
+		<meta property="article:published_time" content="{{.Meta.Published.Format "2006-01-02"}}" />
 		{{ if .Meta.IsRevised }}
 		<meta property="article:revised_time" content="{{.Meta.LastRevised}}" />
 		{{ end }}
@@ -145,7 +145,7 @@ const HtmlEntry = `
 					<h1>{{.Title}}</h1>
 					<aside class="content-info">
 						<div class="info">
-							<p class="published-date"><small>{{.Meta.Published}}</small></p>
+							<p class="published-date"><small>{{.Meta.Published.Format "2006-01-02"}}</small></p>
 							<p class="time-est-reading"><small>{{.Meta.EstReadingTime}}</small></p>
 						</div>
 						<div class="taglist">
