@@ -18,8 +18,7 @@ const (
 )
 
 type (
-	LLHead = lex.LLHead
-	LLNode = lex.LLNode
+	Head = lex.Head
 	Node = lex.Node
 )
 
@@ -37,7 +36,7 @@ type (
 	}
 	Args struct {
 		finished bool
-		next *LLNode
+		next *Node
 	}
 	beFun func(blog *Blog, scopes *Scopes, args *Args) error
 )
@@ -93,34 +92,34 @@ func (s *Scopes) Parent() CompositeRenderable {
 	return s.Top().Context.Parent
 }
 
-func NewArgs(node *LLNode) *Args {
+func NewArgs(node *Node) *Args {
 	return &Args{
 		next: node,
 	}
 }
 
-func (a *Args) Next(name string, type_ lex.FormType) (*LLNode, error) {
+func (a *Args) Next(name string, type_ lex.FormType) (*Node, error) {
 	Assert(!a.finished, "all mandatory arguments must appear before optional ones")
 	if a.next == nil {
 		return nil, fmt.Errorf("missing argument: %s", name)
 	}
 	arg := a.next
 	a.next = a.next.Next
-	if (arg.El.Type & type_) == 0 {
-		return arg, fmt.Errorf("argument of incorrect type, want: %+v, got: %+v", type_, arg.El)
+	if (arg.Type & type_) == 0 {
+		return arg, fmt.Errorf("argument of incorrect type, want: %+v, got: %+v", type_, arg)
 	}
 	return arg, nil
 }
 
-func (a *Args) Optional(name string, type_ lex.FormType) (*LLNode, error) {
+func (a *Args) Optional(name string, type_ lex.FormType) (*Node, error) {
 	a.finished = true
 	if a.next == nil {
 		return nil, nil
 	}
 	arg := a.next
 	a.next = a.next.Next
-	if (arg.El.Type & type_) == 0 {
-		return arg, fmt.Errorf("argument of incorrect type, want: %+v, got: %+v", type_, arg.El)
+	if (arg.Type & type_) == 0 {
+		return arg, fmt.Errorf("argument of incorrect type, want: %+v, got: %+v", type_, arg)
 	}
 	return arg, nil
 }
@@ -148,7 +147,7 @@ var rootFuns = FunMap {
 			if err != nil {
 				return fmt.Errorf("root: %w", err)
 			}
-			if err := blog.Apply(blog, scopes, content.El.Form.First); err != nil {
+			if err := blog.Apply(blog, scopes, content.Form.First); err != nil {
 				return err
 			}
 		}
@@ -172,7 +171,7 @@ var rootFuns = FunMap {
 		if err != nil {
 			return fmt.Errorf("html-comment: %w", err)
 		}
-		comment := Comment(content.El.Text)
+		comment := Comment(content.Text)
 		scopes.Parent().Append(comment)
 		return args.Finished()
 	},
@@ -191,13 +190,13 @@ var rootFuns = FunMap {
 		if err != nil {
 			return err
 		}
-		blog.Title = string(title.El.Text)
+		blog.Title = string(title.Text)
 		altTitle, err := args.Optional("alternative title", TypeText)
 		if err != nil {
 			return err
 		}
 		if altTitle != nil {
-			blog.AltTitle = string(altTitle.El.Text)
+			blog.AltTitle = string(altTitle.Text)
 		}
 		return args.Finished()
 	},
@@ -208,7 +207,7 @@ var rootFuns = FunMap {
 			if err != nil {
 				return fmt.Errorf("author-name: %w", err)
 			}
-			blog.Author.Name = string(name.El.Text)
+			blog.Author.Name = string(name.Text)
 			return args.Finished()
 		})
 		scopes.RegisterFun("email", func(blog *Blog, scopes *Scopes, args *Args) error {
@@ -216,7 +215,7 @@ var rootFuns = FunMap {
 			if err != nil {
 				return fmt.Errorf("author-email: %w", err)
 			}
-			blog.Author.EMail = string(email.El.Text)
+			blog.Author.EMail = string(email.Text)
 			return args.Finished()
 		})
 		for _ = range len(scopes.Top().funs) {
@@ -224,7 +223,7 @@ var rootFuns = FunMap {
 			if err != nil {
 				return fmt.Errorf("author: %w", err)
 			}
-			err = blog.Apply(scopes.Parent(), scopes, nextArgs.El.Form.First)
+			err = blog.Apply(scopes.Parent(), scopes, nextArgs.Form.First)
 			if err != nil {
 				return err
 			}
@@ -241,7 +240,7 @@ var rootFuns = FunMap {
 			if err != nil {
 				return fmt.Errorf("tags: %w", err)
 			}
-			for _, tagStr := range strings.Split(string(tagList.El.Text), " ") {
+			for _, tagStr := range strings.Split(string(tagList.Text), " ") {
 				tags = append(tags, Tag(tagStr))
 			}
 		}
@@ -267,7 +266,7 @@ var rootFuns = FunMap {
 			if err != nil {
 				return fmt.Errorf("subsection: %w", err)
 			}
-			subsection := NewSubsection(string(heading.El.Text))
+			subsection := NewSubsection(string(heading.Text))
 			scopes.Parent().Append(subsection)
 			for !args.IsFinished() {
 				content, err := args.Optional("subsection content", TypeAny)
@@ -285,7 +284,7 @@ var rootFuns = FunMap {
 		if err != nil {
 			return fmt.Errorf("section: %w", err)
 		}
-		section := NewSection(string(heading.El.Text))
+		section := NewSection(string(heading.Text))
 		scopes.Parent().Append(section)
 		for !args.IsFinished() {
 			content, err := args.Optional("section content", TypeAny)
@@ -301,21 +300,16 @@ var rootFuns = FunMap {
 	},
 }
 
-func (blog *Blog) Eval(scopes *Scopes, node *LLNode) error {
-	el := node.El
+func (blog *Blog) Eval(scopes *Scopes, el *Node) error {
 	switch el.Type {
 	case TypeAtom:
 		fun, err := scopes.Resolve(string(el.Atom))
 		if err != nil {
 			return err
 		}
-		return fun(blog, scopes, NewArgs(node.Next))
+		return fun(blog, scopes, NewArgs(el.Next))
 	case TypeForm:
 		Assert(false, "unreachable")
-		//err := blog.Apply(scopes.Parent(), scopes, el.Form.First)
-		//if err != nil {
-		//	return err
-		//}
 	case TypeText:
 		scopes.Parent().Append(Text(el.Text))
 	default:
@@ -324,12 +318,12 @@ func (blog *Blog) Eval(scopes *Scopes, node *LLNode) error {
 	return nil
 }
 
-func (blog *Blog) Apply(parent CompositeRenderable, scopes *Scopes, node *LLNode) (err error) {
+func (blog *Blog) Apply(parent CompositeRenderable, scopes *Scopes, node *Node) (err error) {
 	scopes.Push(NewScope(parent))
 	defer scopes.Pop()
-	switch node.El.Type {
+	switch node.Type {
 	case TypeForm:
-		err = blog.Eval(scopes, node.El.Form.First)
+		err = blog.Eval(scopes, node.Form.First)
 	case TypeText: fallthrough
 	case TypeAtom:
 		err = blog.Eval(scopes, node)
