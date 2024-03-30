@@ -260,6 +260,21 @@ var rootFuns = FunMap {
 		}
 		return args.Finished()
 	},
+	"paragraph": func(blog *Blog, scopes *Scopes, args *Args) error {
+		pg := &Paragraph{}
+		scopes.Parent().Append(pg)
+		for !args.IsFinished() {
+			content, err := args.Optional("paragraph content", TypeAny)
+			if err != nil {
+				return fmt.Errorf("paragraph: %w", err)
+			}
+			err = blog.Apply(pg, scopes, content)
+			if err != nil {
+				return fmt.Errorf("paragraph: %w", err)
+			}
+		}
+		return args.Finished()
+	},
 	"section": func(blog *Blog, scopes *Scopes, args *Args) error {
 		scopes.RegisterFun("subsection", func(blog *Blog, scopes *Scopes, args *Args) error {
 			heading, err := args.Next("subsection heading", TypeText)

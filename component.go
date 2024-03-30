@@ -23,6 +23,7 @@ func init() {
 	template.Must(pages.Parse(HtmlEntry))
 	template.Must(pages.Parse(HtmlSection))
 	template.Must(pages.Parse(HtmlSubsection))
+	template.Must(pages.Parse(HtmlText))
 	template.Must(pages.Parse(HtmlParagraph))
 	template.Must(pages.Parse(HtmlLink))
 	template.Must(pages.Parse(HtmlAside))
@@ -357,21 +358,45 @@ const HtmlSubsection = `
 {{ end }}
 `
 
+type Paragraph struct {
+	Content []Renderable
+}
+
+var _ CompositeRenderable = (*Paragraph)(nil)
+
+func (p *Paragraph) Render() (template.HTML, error) {
+	buf := &bytes.Buffer{}
+	err := pages.Execute(buf, "Paragraph", p)
+	return template.HTML(buf.String()), err
+}
+
+func (p *Paragraph) Append(child Renderable) {
+	p.Content = append(p.Content, child)
+}
+
+const HtmlParagraph = `
+{{ define "Paragraph" }}
+<p>
+{{ range .Content }}
+{{ Render . }}
+{{ end }}
+</p>
+{{ end }}
+`
+
 type Text string
 
 var _ Renderable = (*Text)(nil)
 
 func (t Text) Render() (template.HTML, error) {
 	buf := &bytes.Buffer{}
-	err := pages.Execute(buf, "Paragraph", t)
+	err := pages.Execute(buf, "Text", t)
 	return template.HTML(buf.String()), err
 }
 
-const HtmlParagraph = `
-{{ define "Paragraph" }}
-<p>
+const HtmlText = `
+{{ define "Text" }}
 {{ . }}
-</p>
 {{ end }}
 `
 

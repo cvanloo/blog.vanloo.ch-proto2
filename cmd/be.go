@@ -55,25 +55,47 @@ const testInput2 = `
 
 {section The good parts
 
+{paragraph
 Because of its high price, I would not have bought the reMarkable if it were not for the 30-day money-back guarantee.
 After a week of daily usage, returning it was the last thing on my mind.
+}
 
+{paragraph
 Consistent with their advertised claims, it really feels like writing on real paper.
 The reMarkable is handy, light-weight, and has lots of storage for my notes.
 No more difficult to search through piles of paper up to the ceiling.
 Tagging notebooks and single pages within a notebook makes them easily discoverable.
+}
 
 {html-comment This will appear in the html output as a comment}
 
 {subsection It runs Linux
 
+{paragraph
 I did not want to end on a negative note, so I kept the best part for last:
 The reMarkable runs on Linux (which makes total sense if you think about it).
+}
 
-There is a {sidenote sidenote \\ This is the sidenote content.}.
+{paragraph There is a {sidenote sidenote. \\ This is the sidenote content.} Looks cool.}
 
+{comment
+There is a {sidenote sidenote \\ This is the sidenote content.}. Looks cool.
+
+Paragraph(
+	Text(There is a),
+	Form(
+		Atom(sidenote),
+		Text(sidenote),
+		Text(This is the sidenote content.),
+	),
+	Text(Looks cool.),
+)
+}
+
+{paragraph
 When plugged into a computer, the reMarkable automatically opens an SSH port.
 It takes a bit of rummaging through settings to find the IP address(es) and root password.
+}
 }
 }
 
