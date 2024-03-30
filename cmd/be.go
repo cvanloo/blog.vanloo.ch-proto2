@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"be/component"
+	. "be"
+	. "be/internal/debug"
 	"be/lex"
 	"be/tok"
 )
@@ -18,8 +19,7 @@ func init() {
 
 func main() {
 	tokenizer := tok.NewTokenizer([]rune(testInput2))
-	//tokenizer := tok.NewTokenizer([]rune(remarkableReviewBlogPostSource))
-	tokens := must(tokenizer.Tokenize())
+	tokens := Must(tokenizer.Tokenize())
 	for _, t := range tokens {
 		fmt.Println(t)
 	}
@@ -31,7 +31,7 @@ func main() {
 	scopes := InitScopes(blog)
 	err := Eval(blog, scopes, NewArgs(root.First))
 	fmt.Printf("%+v\n", blog)
-	fmt.Println(component.String(blog))
+	fmt.Println(String(blog))
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 	}
@@ -39,7 +39,7 @@ func main() {
 	if *shouldServe {
 		http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))
 		http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
-		http.HandleFunc("/", component.Handler(blog))
+		http.HandleFunc("/", Handler(blog, PanicIf))
 		http.ListenAndServe(":8080", nil)
 	}
 }

@@ -5,7 +5,7 @@ default: all
 SOURCES := $(shell find . -name '*.go')
 
 be: $(SOURCES)
-	go build .
+	go build cmd/be.go
 
 all: be
 	./be

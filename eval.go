@@ -1,4 +1,4 @@
-package main
+package be
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"be/component"
 	"be/lex"
+	. "be/internal/debug"
 )
 
 const (
@@ -21,14 +21,12 @@ type (
 	LLHead = lex.LLHead
 	LLNode = lex.LLNode
 	Node = lex.Node
-	Blog = component.EntryData
-	Renderable = component.Renderable
 )
 
 type (
 	FunMap map[string]beFun
 	Context struct {
-		Parent Renderable
+		Parent CompositeRenderable
 	}
 	Scope struct {
 		funs FunMap
@@ -45,7 +43,7 @@ type (
 	beFun func(blog *Blog, scopes *Scopes, args *Args) error
 )
 
-func NewScope(parent Renderable) Scope {
+func NewScope(parent CompositeRenderable) Scope {
 	return Scope{
 		funs: FunMap{},
 		Context: &Context{
@@ -92,7 +90,7 @@ func (s *Scopes) Resolve(name string) (beFun, error) {
 	return nil, fmt.Errorf("function not in scope: %s", name)
 }
 
-func (s *Scopes) Parent() Renderable {
+func (s *Scopes) Parent() CompositeRenderable {
 	return s.Top().Context.Parent
 }
 
@@ -103,7 +101,7 @@ func NewArgs(node *LLNode) *Args {
 }
 
 func (a *Args) Next(name string, type_ lex.FormType) (*Arg, error) {
-	assert(!a.finished, "all mandatory arguments must appear before optional ones")
+	Assert(!a.finished, "all mandatory arguments must appear before optional ones")
 	if a.next == nil {
 		return nil, fmt.Errorf("missing argument: %s", name)
 	}
@@ -143,7 +141,7 @@ var rootFuns = FunMap {
 	"root": func(blog *Blog, scopes *Scopes, args *Args) error {
 		// @todo: read defaults from config file?
 		blog.BlogName = "save-lisp-and-die"
-		blog.Author = component.Author{}
+		blog.Author = Author{}
 		blog.Author.Name = "cvl"
 
 		for !args.IsFinished() {
@@ -163,7 +161,7 @@ var rootFuns = FunMap {
 	},
 	"eof": func(blog *Blog, scopes *Scopes, args *Args) error {
 		// @todo: fill in blog.Meta?
-		blog.Meta = component.Meta{
+		blog.Meta = Meta{
 			Language: "en",
 			//CanonicalURL string
 			//Description string
@@ -179,30 +177,17 @@ var rootFuns = FunMap {
 		if err != nil {
 			return fmt.Errorf("html-comment: %w", err)
 		}
-		comment := component.Comment(content.Text)
+		comment := Comment(content.Text)
 		scopes.Parent().Append(comment)
 		return args.Finished()
 	},
 	"comment": func(blog *Blog, scopes *Scopes, args *Args) error {
-		comment := &component.ActualComment{}
-		scopes.Parent().Append(comment)
 		for !args.IsFinished() {
-			content, err := args.Optional("comment content", TypeAny)
+			content, err := args.Optional("comment content (will be ignored)", TypeAny)
 			if err != nil {
 				return fmt.Errorf("comment: %w", err)
 			}
-			if content.Type == TypeText {
-				comment.Content = append(comment.Content, component.Text(content.Text))
-			} else if content.Type == TypeForm {
-				scopes.Push(NewScope(comment))
-				err := Eval(blog, scopes, NewArgs(content.Form.First))
-				scopes.Pop()
-				if err != nil {
-					return fmt.Errorf("comment: %w", err)
-				}
-			} else {
-				return fmt.Errorf("comment: unhandled argument type: %+v", content)
-			}
+			_ = content
 		}
 		return args.Finished()
 	},
@@ -222,7 +207,7 @@ var rootFuns = FunMap {
 		return args.Finished()
 	},
 	"author": func(blog *Blog, scopes *Scopes, args *Args) error {
-		blog.Author = component.Author{} // ensure author is initialized and zeroed
+		blog.Author = Author{} // ensure author is initialized and zeroed
 		scopes.RegisterFun("name", func(blog *Blog, scopes *Scopes, args *Args) error {
 			name, err := args.Next("author name", TypeText)
 			if err != nil {
@@ -253,14 +238,14 @@ var rootFuns = FunMap {
 		return args.Finished()
 	},
 	"tags": func(blog *Blog, scopes *Scopes, args *Args) error {
-		tags := component.Tags{}
+		tags := Tags{}
 		for !args.IsFinished() {
 			tagList, err := args.Optional("space separated tag list", TypeText)
 			if err != nil {
 				return fmt.Errorf("tags: %w", err)
 			}
 			for _, tagStr := range strings.Split(string(tagList.Text), " ") {
-				tags = append(tags, component.Tag(tagStr))
+				tags = append(tags, Tag(tagStr))
 			}
 		}
 		blog.Tags = tags
@@ -273,7 +258,7 @@ var rootFuns = FunMap {
 				return fmt.Errorf("body: %w", err)
 			}
 			if content.Type == TypeText {
-				blog.Content = append(blog.Content, component.Text(content.Text))
+				blog.Content = append(blog.Content, Text(content.Text))
 			} else if content.Type == TypeForm {
 				scopes.Push(NewScope(blog))
 				err := Eval(blog, scopes, NewArgs(content.Form.First))
@@ -292,14 +277,14 @@ var rootFuns = FunMap {
 		if err != nil {
 			return fmt.Errorf("section: %w", err)
 		}
-		section := component.NewSection(string(heading.Text))
+		section := NewSection(string(heading.Text))
 		blog.Content = append(blog.Content, section)
 		scopes.RegisterFun("subsection", func(blog *Blog, scopes *Scopes, args *Args) error {
 			heading, err := args.Next("subsection heading", TypeText)
 			if err != nil {
 				return fmt.Errorf("subsection: %w", err)
 			}
-			subsection := component.NewSubsection(string(heading.Text))
+			subsection := NewSubsection(string(heading.Text))
 			section.Content = append(section.Content, subsection)
 			// if there were a subsubsection, the function would have to be registered here
 			for !args.IsFinished() {
@@ -308,7 +293,7 @@ var rootFuns = FunMap {
 					return fmt.Errorf("subsection: %w", err)
 				}
 				if content.Type == TypeText {
-					subsection.Content = append(subsection.Content, component.Text(content.Text))
+					subsection.Content = append(subsection.Content, Text(content.Text))
 				} else if content.Type == TypeForm {
 					scopes.Push(NewScope(subsection))
 					err := Eval(blog, scopes, NewArgs(content.Form.First))
@@ -328,7 +313,7 @@ var rootFuns = FunMap {
 				return fmt.Errorf("section: %w", err)
 			}
 			if content.Type == TypeText {
-				section.Content = append(section.Content, component.Text(content.Text))
+				section.Content = append(section.Content, Text(content.Text))
 			} else if content.Type == TypeForm {
 				scopes.Push(NewScope(section))
 				err := Eval(blog, scopes, NewArgs(content.Form.First))
@@ -357,15 +342,15 @@ func Eval(blog *Blog, scopes *Scopes, args *Args) error {
 		}
 		return fun(blog, scopes, args)
 	case TypeForm:
-		assert(false, "@todo: unhandled")
+		Assert(false, "@todo: unhandled")
 		// @fixme: doesn't work (here)!
 		//scopes.Push(Scope{})
 		//defer scopes.Pop()
 		//return Eval(blog, scopes, NewArgs(arg.Form.First))
 	case TypeText:
-		assert(false, "@todo: unhandled")
+		Assert(false, "@todo: unhandled")
 	default:
-		unreachable()
+		Unreachable()
 	}
 	return nil
 }
