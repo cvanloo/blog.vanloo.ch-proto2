@@ -298,6 +298,19 @@ var rootFuns = FunMap {
 		}
 		return args.Finished()
 	},
+	"sidenote": func(blog *Blog, scopes *Scopes, args *Args) error {
+		short, err := args.Next("sidenote short text", TypeText)
+		if err != nil {
+			return fmt.Errorf("sidenote: %w", err)
+		}
+		full, err := args.Next("sidenote content", TypeText)
+		if err != nil {
+			return fmt.Errorf("sidenote: %w", err)
+		}
+		sidenote := NewSidenote(string(short.Text), string(full.Text))
+		scopes.Parent().Append(sidenote)
+		return args.Finished()
+	},
 }
 
 func (blog *Blog) Eval(scopes *Scopes, el *Node) error {
@@ -309,7 +322,7 @@ func (blog *Blog) Eval(scopes *Scopes, el *Node) error {
 		}
 		return fun(blog, scopes, NewArgs(el.Next))
 	case TypeForm:
-		Assert(false, "unreachable")
+		Unreachable()
 	case TypeText:
 		scopes.Parent().Append(Text(el.Text))
 	default:

@@ -47,13 +47,13 @@ func main() {
 }
 
 const testInput2 = `
-(author (name Colin van~Loo) (email contact@vanloo.ch))
-(title Reviewing the reMarkable)
-(tags reMarkable review proprietary technology)
+{author {name Colin van~Loo} {email contact@vanloo.ch}}
+{title Reviewing the reMarkable}
+{tags reMarkable review proprietary technology}
 
-(body
+{body
 
-(section The good parts
+{section The good parts
 
 Because of its high price, I would not have bought the reMarkable if it were not for the 30-day money-back guarantee.
 After a week of daily usage, returning it was the last thing on my mind.
@@ -63,19 +63,21 @@ The reMarkable is handy, light-weight, and has lots of storage for my notes.
 No more difficult to search through piles of paper up to the ceiling.
 Tagging notebooks and single pages within a notebook makes them easily discoverable.
 
-(html-comment This will appear in the html output as a comment)
+{html-comment This will appear in the html output as a comment}
 
-(subsection It runs Linux
+{subsection It runs Linux
 
 I did not want to end on a negative note, so I kept the best part for last:
-The reMarkable runs on Linux \(which makes total sense if you think about it\).
+The reMarkable runs on Linux (which makes total sense if you think about it).
+
+There is a {sidenote sidenote \\ This is the sidenote content.}.
 
 When plugged into a computer, the reMarkable automatically opens an SSH port.
-It takes a bit of rummaging through settings to find the IP address\(es\) and root password.
-)
-)
+It takes a bit of rummaging through settings to find the IP address(es) and root password.
+}
+}
 
-)
+}
 `
 
 const testInput = `

@@ -1,34 +1,55 @@
 // Package tok implements a tokenizer for the be markup language.
 //
 // Special symbols are
-//   - '~'   (nbsp)
-//   - '...' (ellipsis)
-//   - '('   (start form)
-//   - ')'   (end form)
-// ...these need to be escaped if their literal interpretation is intended.
+//   - '~'    (nbsp)
+//   - '...'  (ellipsis)
+//   - '{'    (start form)
+//   - '}'    (end form)
+//   - '\\'   (text argument separator)
+// ...these need to be escaped to have them appear in the output literally.
 //
 // Escape symbols are
 //   - '\~'   (literal tilde)
 //   - '\...' (literal three dots)
-//   - '\('   (literal opening parenthesis)
-//   - '\)'   (literal closing parenthesis)
+//   - '\{'   (literal opening parenthesis)
+//   - '\}'   (literal closing parenthesis)
 //   - '\+'   (must come in pairs: starts (and ends) a raw text form)
 //
-// To separate multiple texts, the 't' or 'text' function is needed:
+// Type a literal backslash: '{backslash}'.
+//
+// Multiple text arguments are separated by two newlines or '\'.
+//
 // ```
-// <= This is all one text This still belongs to the same text
-// => Text{0: `This is all one text This still belongs to the same text`}
+// <= This is all one text. This still belongs to the same text.
+// => Text{0: `This is all one text. This still belongs to the same text.`}
+// ```
+//
+// and
+//
+// ```
+// <= This is all one text.
+// <= This still belongs to the same text.
+// => Text{0: `This is all one text. This still belongs to the same text.`}
 // ```
 //
 // vs.
 //
 // ```
-// <= (t This is all one text) This is a different text
-// => Text{4: `This is all one text`}
-// => Text{26: `This is a different text`}
+// <= This is all one text. \\ This is a different text.
+// => Text{0: `This is all one text.`}
+// => Text{25: `This is a different text.`}
 // ```
 //
-// Text is also split by two newlines.
+// and
+//
+// ```
+// <= This is all one text.
+// <=
+// <= This is a different text.
+// => Text{0: `This is all one text.`}
+// => Text{23: `This is a different text.`}
+// ```
+//
 // Lines split by a single newline remain part of the same Text block, and are
 // joined together (newline replaced by space).
 // Multiple spaces are removed, so that only a single space remains.
@@ -40,10 +61,20 @@ import (
 	"log"
 )
 
+const (
+	SymbolFormStart = '{'
+	SymbolFormEnd = '}'
+	SymbolNbsp = '~'
+	SymbolEscape = '\\'
+	SymbolRawString = '+'
+	SymbolsEllipsis = "..."
+)
+
 type TokenType int
 const (
 	TypeFormStart TokenType = iota
 	TypeAtom
+	TypeParagraph
 	TypeText
 	TypeFormEnd
 )
@@ -54,9 +85,7 @@ type (
 		Text string
 		Pos int
 	}
-
 	tokFunc func() tokFunc
-
 	Tokenizer struct {
 		bs []rune
 		l int
@@ -65,7 +94,6 @@ type (
 		state tokFunc
 		err error
 	}
-
 	TokenError struct {
 		Msg string
 		Pos int
@@ -98,21 +126,22 @@ func (t *Tokenizer) tokError(err error) tokFunc {
 }
 
 func (t *Tokenizer) tokTextOrForm() tokFunc { // initial state [:init:]
-	if t.bs[t.pos] == '(' {
+	if t.bs[t.pos] == SymbolFormStart {
 		return t.tokForm
 	}
 	return t.tokText
 }
 
 func (t *Tokenizer) tokText() tokFunc { // parse text
-	// @fixme: text composition????
+	// @todo: paragraphs
 	var (
 		textEnd = t.pos
 		lastPos = textEnd
 		quoted = false
 		parsedText = ""
 	)
-	for textEnd < t.l && ((t.bs[textEnd] != ')' && t.bs[textEnd] != '(') || quoted) {
+outer_loop:
+	for textEnd < t.l && ((t.bs[textEnd] != SymbolFormEnd && t.bs[textEnd] != SymbolFormStart) || quoted) {
 		if !quoted {
 			if t.bs[textEnd] == ' ' { // merge excessive white space
 				parsedText += string(t.bs[lastPos:textEnd])
@@ -124,14 +153,14 @@ func (t *Tokenizer) tokText() tokFunc { // parse text
 				}
 				lastPos = textEnd
 
-				if textEnd < t.l && t.bs[textEnd] != '\n' && t.bs[textEnd] != '(' {
+				if textEnd < t.l && t.bs[textEnd] != '\n' && t.bs[textEnd] != SymbolFormEnd {
 					parsedText += " "
 					lastPos = textEnd
 				}
 			} else if t.bs[textEnd] == '\n' { // two newlines separate text blocks, lines divided by a single newline are joined
 				if textEnd+1 < t.l {
-					if t.bs[textEnd+1] == '\n' || t.bs[textEnd+1] == ')' {
-						break // this text block is finished
+					if t.bs[textEnd+1] == '\n' || t.bs[textEnd+1] == SymbolFormEnd {
+						break // this text block is finished [:text-block-finished:]
 						// @note: any further newlines are skipped in .Tokenize() by the call to .skipWhitespace()
 					} else {
 						// merge with next text block
@@ -145,17 +174,20 @@ func (t *Tokenizer) tokText() tokFunc { // parse text
 					lastPos = textEnd + 1
 					textEnd = lastPos
 				}
-			} else if t.bs[textEnd] == '\\' {
+			} else if t.bs[textEnd] == SymbolEscape {
 				if textEnd+1 < t.l {
 					esc := t.bs[textEnd+1]
 					switch esc {
-						case '(': fallthrough
-						case ')': fallthrough
-					case '\\':
+					case SymbolFormStart:
+						fallthrough
+					case SymbolFormEnd:
+						fallthrough
+					case SymbolEscape:
 						parsedText += string(t.bs[lastPos:textEnd])
-						lastPos = textEnd + 1 // past backslash
-						textEnd += 2          // past escaped char
-					case '+':
+						lastPos = textEnd + 2 // past escaped chars
+						textEnd = lastPos
+						break outer_loop // this text block is finished [:text-block-finished:]
+					case SymbolRawString:
 						parsedText += string(t.bs[lastPos:textEnd])
 						lastPos = textEnd + 2 // past escaped char
 						textEnd += 2          // past escaped char
@@ -164,14 +196,14 @@ func (t *Tokenizer) tokText() tokFunc { // parse text
 						return t.tokError(t.NewTokenError(fmt.Sprintf("invalid escape character: `%s`", string(esc))))
 					}
 				} else {
-					return t.tokError(t.NewTokenError("unfinished escape character (did you mean `\\`?)"))
+					return t.tokError(t.NewTokenError("unfinished escape character (did you mean `{backslash}`?)"))
 				}
-			} else if t.bs[textEnd] == '~' {
+			} else if t.bs[textEnd] == SymbolNbsp {
 				parsedText += string(t.bs[lastPos:textEnd])
 				parsedText += "\u00A0" // no-break space
 				lastPos = textEnd + 1  // past ~
 				textEnd = lastPos
-			} else if textEnd+2 < t.l && string(t.bs[textEnd:textEnd+3]) == "..." {
+			} else if textEnd+2 < t.l && string(t.bs[textEnd:textEnd+3]) == SymbolsEllipsis {
 				parsedText += string(t.bs[lastPos:textEnd])
 				parsedText += "\u2026" // horizontal ellipsis
 				lastPos = textEnd + 3  // past ...
@@ -180,7 +212,7 @@ func (t *Tokenizer) tokText() tokFunc { // parse text
 				textEnd++
 			}
 		} else {
-			if t.bs[textEnd] == '\\' && textEnd+1 < t.l && t.bs[textEnd+1] == '+' {
+			if t.bs[textEnd] == SymbolEscape && textEnd+1 < t.l && t.bs[textEnd+1] == SymbolRawString {
 				parsedText += string(t.bs[lastPos:textEnd])
 				lastPos = textEnd + 2
 				textEnd = lastPos
@@ -204,7 +236,7 @@ func (t *Tokenizer) tokText() tokFunc { // parse text
 func (t *Tokenizer) tokForm() tokFunc { // parse form start
 	t.tokens = append(t.tokens, Token{
 		Type: TypeFormStart,
-		Text: "(",
+		Text: string(SymbolFormStart),
 		Pos: t.pos,
 	})
 	t.pos++
@@ -214,10 +246,10 @@ func (t *Tokenizer) tokForm() tokFunc { // parse form start
 
 func (t *Tokenizer) tokNilOrAtom() tokFunc {
 	r := t.bs[t.pos]
-	if r == '(' {
+	if r == SymbolFormStart {
 		return t.tokError(t.NewTokenError("cannot start form / expected atom or nil"))
 	}
-	if r == ')' {
+	if r == SymbolFormEnd {
 		return t.tokNil
 	}
 	if isAtomChar(r) {
@@ -229,7 +261,7 @@ func (t *Tokenizer) tokNilOrAtom() tokFunc {
 func (t *Tokenizer) tokNil() tokFunc { // parse form end
 	t.tokens = append(t.tokens, Token{
 		Type: TypeFormEnd,
-		Text: ")",
+		Text: string(SymbolFormEnd),
 		Pos: t.pos,
 	})
 	t.pos++
@@ -254,10 +286,10 @@ func (t *Tokenizer) tokAtom() tokFunc { // parse atom
 
 func (t *Tokenizer) tokNilOrTextOrForm() tokFunc {
 	r := t.bs[t.pos]
-	if r == ')' {
+	if r == SymbolFormEnd {
 		return t.tokNil
 	}
-	if r == '(' {
+	if r == SymbolFormStart {
 		return t.tokForm
 	}
 	return t.tokText
@@ -268,7 +300,7 @@ func (t *Tokenizer) tokEOF() tokFunc {
 		t.tokens,
 		Token{
 			Type: TypeFormStart,
-			Text: "(",
+			Text: string(SymbolFormStart),
 			Pos: t.pos,
 		},
 		Token{
@@ -278,7 +310,7 @@ func (t *Tokenizer) tokEOF() tokFunc {
 		},
 		Token{
 			Type: TypeFormEnd,
-			Text: ")",
+			Text: string(SymbolFormEnd),
 			Pos: t.pos,
 		},
 	)
