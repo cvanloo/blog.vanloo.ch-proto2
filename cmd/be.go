@@ -29,12 +29,14 @@ func main() {
 
 	blog := &Blog{}
 	scopes := InitScopes(blog)
-	err := Eval(blog, scopes, NewArgs(root.First))
-	fmt.Printf("%+v\n", blog)
-	fmt.Println(String(blog))
-	if err != nil {
-		fmt.Printf("%+v\n", err)
+	if err := blog.Eval(scopes, root.First); err != nil {
+		fmt.Printf("error evaluating blog: %v", err)
 	}
+	blogHtml, err := String(blog)
+	if err != nil {
+		fmt.Printf("error generating html: %v", err)
+	}
+	fmt.Println(blogHtml)
 
 	if *shouldServe {
 		http.Handle("/fonts/", http.StripPrefix("/fonts/", http.FileServer(http.Dir("fonts"))))

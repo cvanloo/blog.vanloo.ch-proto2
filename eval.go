@@ -35,7 +35,6 @@ type (
 	Scopes struct {
 		scopes []Scope
 	}
-	Arg = Node
 	Args struct {
 		finished bool
 		next *LLNode
@@ -100,28 +99,28 @@ func NewArgs(node *LLNode) *Args {
 	}
 }
 
-func (a *Args) Next(name string, type_ lex.FormType) (*Arg, error) {
+func (a *Args) Next(name string, type_ lex.FormType) (*LLNode, error) {
 	Assert(!a.finished, "all mandatory arguments must appear before optional ones")
 	if a.next == nil {
 		return nil, fmt.Errorf("missing argument: %s", name)
 	}
-	arg := a.next.El
+	arg := a.next
 	a.next = a.next.Next
-	if (arg.Type & type_) == 0 {
-		return arg, fmt.Errorf("argument of incorrect type, want: %+v, got: %+v", type_, arg)
+	if (arg.El.Type & type_) == 0 {
+		return arg, fmt.Errorf("argument of incorrect type, want: %+v, got: %+v", type_, arg.El)
 	}
 	return arg, nil
 }
 
-func (a *Args) Optional(name string, type_ lex.FormType) (*Arg, error) {
+func (a *Args) Optional(name string, type_ lex.FormType) (*LLNode, error) {
 	a.finished = true
 	if a.next == nil {
 		return nil, nil
 	}
-	arg := a.next.El
+	arg := a.next
 	a.next = a.next.Next
-	if (arg.Type & type_) == 0 {
-		return arg, fmt.Errorf("argument of incorrect type, want: %+v, got: %+v", type_, arg)
+	if (arg.El.Type & type_) == 0 {
+		return arg, fmt.Errorf("argument of incorrect type, want: %+v, got: %+v", type_, arg.El)
 	}
 	return arg, nil
 }
@@ -145,15 +144,11 @@ var rootFuns = FunMap {
 		blog.Author.Name = "cvl"
 
 		for !args.IsFinished() {
-			nextArgs, err := args.Optional("root args", TypeForm)
+			content, err := args.Optional("root content", TypeForm)
 			if err != nil {
 				return fmt.Errorf("root: %w", err)
 			}
-			log.Printf("nextArgs: %+v, %+v", nextArgs, nextArgs.Form.First.El)
-			scopes.Push(NewScope(blog))
-			err = Eval(blog, scopes, NewArgs(nextArgs.Form.First))
-			scopes.Pop()
-			if err != nil {
+			if err := blog.Apply(blog, scopes, content.El.Form.First); err != nil {
 				return err
 			}
 		}
@@ -173,11 +168,11 @@ var rootFuns = FunMap {
 		return args.Finished()
 	},
 	"html-comment": func(blog *Blog, scopes *Scopes, args *Args) error {
-		content, err := args.Next("html-comment text", TypeText)
+		content, err := args.Optional("html-comment text", TypeText)
 		if err != nil {
 			return fmt.Errorf("html-comment: %w", err)
 		}
-		comment := Comment(content.Text)
+		comment := Comment(content.El.Text)
 		scopes.Parent().Append(comment)
 		return args.Finished()
 	},
@@ -196,13 +191,13 @@ var rootFuns = FunMap {
 		if err != nil {
 			return err
 		}
-		blog.Title = string(title.Text)
+		blog.Title = string(title.El.Text)
 		altTitle, err := args.Optional("alternative title", TypeText)
 		if err != nil {
 			return err
 		}
 		if altTitle != nil {
-			blog.AltTitle = string(altTitle.Text)
+			blog.AltTitle = string(altTitle.El.Text)
 		}
 		return args.Finished()
 	},
@@ -213,7 +208,7 @@ var rootFuns = FunMap {
 			if err != nil {
 				return fmt.Errorf("author-name: %w", err)
 			}
-			blog.Author.Name = string(name.Text)
+			blog.Author.Name = string(name.El.Text)
 			return args.Finished()
 		})
 		scopes.RegisterFun("email", func(blog *Blog, scopes *Scopes, args *Args) error {
@@ -221,16 +216,15 @@ var rootFuns = FunMap {
 			if err != nil {
 				return fmt.Errorf("author-email: %w", err)
 			}
-			blog.Author.EMail = string(email.Text)
+			blog.Author.EMail = string(email.El.Text)
 			return args.Finished()
 		})
-		//for !args.IsFinished() {
-		for _ = range 2 {
+		for _ = range len(scopes.Top().funs) {
 			nextArgs, err := args.Optional("author args", TypeForm)
 			if err != nil {
 				return fmt.Errorf("author: %w", err)
 			}
-			err = Eval(blog, scopes, NewArgs(nextArgs.Form.First))
+			err = blog.Apply(scopes.Parent(), scopes, nextArgs.El.Form.First)
 			if err != nil {
 				return err
 			}
@@ -238,13 +232,16 @@ var rootFuns = FunMap {
 		return args.Finished()
 	},
 	"tags": func(blog *Blog, scopes *Scopes, args *Args) error {
+		if len(blog.Tags) > 0 {
+			log.Printf("tags: already set, overwriting")
+		}
 		tags := Tags{}
 		for !args.IsFinished() {
 			tagList, err := args.Optional("space separated tag list", TypeText)
 			if err != nil {
 				return fmt.Errorf("tags: %w", err)
 			}
-			for _, tagStr := range strings.Split(string(tagList.Text), " ") {
+			for _, tagStr := range strings.Split(string(tagList.El.Text), " ") {
 				tags = append(tags, Tag(tagStr))
 			}
 		}
@@ -257,104 +254,85 @@ var rootFuns = FunMap {
 			if err != nil {
 				return fmt.Errorf("body: %w", err)
 			}
-			if content.Type == TypeText {
-				blog.Content = append(blog.Content, Text(content.Text))
-			} else if content.Type == TypeForm {
-				scopes.Push(NewScope(blog))
-				err := Eval(blog, scopes, NewArgs(content.Form.First))
-				scopes.Pop()
-				if err != nil {
-					return fmt.Errorf("body: %w", err)
-				}
-			} else {
-				return fmt.Errorf("body: unhandled argument type: %+v", content)
+			err = blog.Apply(blog, scopes, content)
+			if err != nil {
+				return fmt.Errorf("body: %w", err)
 			}
 		}
 		return args.Finished()
 	},
 	"section": func(blog *Blog, scopes *Scopes, args *Args) error {
-		heading, err := args.Next("section heading", TypeText)
-		if err != nil {
-			return fmt.Errorf("section: %w", err)
-		}
-		section := NewSection(string(heading.Text))
-		blog.Content = append(blog.Content, section)
 		scopes.RegisterFun("subsection", func(blog *Blog, scopes *Scopes, args *Args) error {
 			heading, err := args.Next("subsection heading", TypeText)
 			if err != nil {
 				return fmt.Errorf("subsection: %w", err)
 			}
-			subsection := NewSubsection(string(heading.Text))
-			section.Content = append(section.Content, subsection)
-			// if there were a subsubsection, the function would have to be registered here
+			subsection := NewSubsection(string(heading.El.Text))
+			scopes.Parent().Append(subsection)
 			for !args.IsFinished() {
 				content, err := args.Optional("subsection content", TypeAny)
 				if err != nil {
 					return fmt.Errorf("subsection: %w", err)
 				}
-				if content.Type == TypeText {
-					subsection.Content = append(subsection.Content, Text(content.Text))
-				} else if content.Type == TypeForm {
-					scopes.Push(NewScope(subsection))
-					err := Eval(blog, scopes, NewArgs(content.Form.First))
-					scopes.Pop()
-					if err != nil {
-						return fmt.Errorf("subsection: %w", err)
-					}
-				} else {
-					return fmt.Errorf("subsection: unhandled argument type: %+v", content)
+				err = blog.Apply(subsection, scopes, content)
+				if err != nil {
+					return fmt.Errorf("subsection: %w", err)
 				}
 			}
 			return args.Finished()
 		})
+		heading, err := args.Next("section heading", TypeText)
+		if err != nil {
+			return fmt.Errorf("section: %w", err)
+		}
+		section := NewSection(string(heading.El.Text))
+		scopes.Parent().Append(section)
 		for !args.IsFinished() {
 			content, err := args.Optional("section content", TypeAny)
 			if err != nil {
 				return fmt.Errorf("section: %w", err)
 			}
-			if content.Type == TypeText {
-				section.Content = append(section.Content, Text(content.Text))
-			} else if content.Type == TypeForm {
-				scopes.Push(NewScope(section))
-				err := Eval(blog, scopes, NewArgs(content.Form.First))
-				scopes.Pop()
-				if err != nil {
-					return fmt.Errorf("section: %w", err)
-				}
-			} else {
-				return fmt.Errorf("section: unhandled argument type: %+v", content)
+			err = blog.Apply(section, scopes, content)
+			if err != nil {
+				return fmt.Errorf("section: %w", err)
 			}
 		}
 		return args.Finished()
 	},
 }
 
-func Eval(blog *Blog, scopes *Scopes, args *Args) error {
-	arg, err := args.Next("eval", TypeAny)
-	if err != nil {
-		return fmt.Errorf("eval: %w", err)
-	}
-	switch arg.Type {
+func (blog *Blog) Eval(scopes *Scopes, node *LLNode) error {
+	el := node.El
+	switch el.Type {
 	case TypeAtom:
-		fun, err := scopes.Resolve(string(arg.Atom))
+		fun, err := scopes.Resolve(string(el.Atom))
 		if err != nil {
-			return fmt.Errorf("eval: %w", err)
+			return err
 		}
-		return fun(blog, scopes, args)
+		return fun(blog, scopes, NewArgs(node.Next))
 	case TypeForm:
-		Assert(false, "@todo: unhandled")
-		// @fixme: doesn't work (here)!
-		//scopes.Push(Scope{})
-		//defer scopes.Pop()
-		//return Eval(blog, scopes, NewArgs(arg.Form.First))
+		Assert(false, "unreachable")
+		//err := blog.Apply(scopes.Parent(), scopes, el.Form.First)
+		//if err != nil {
+		//	return err
+		//}
 	case TypeText:
-		Assert(false, "@todo: unhandled")
+		scopes.Parent().Append(Text(el.Text))
 	default:
 		Unreachable()
 	}
 	return nil
 }
 
-func Apply(blog *Blog, scopes *Scopes, fun beFun, arg *Arg) error {
-	return nil
+func (blog *Blog) Apply(parent CompositeRenderable, scopes *Scopes, node *LLNode) (err error) {
+	scopes.Push(NewScope(parent))
+	defer scopes.Pop()
+	switch node.El.Type {
+	case TypeForm:
+		err = blog.Eval(scopes, node.El.Form.First)
+	case TypeText: fallthrough
+	case TypeAtom:
+		err = blog.Eval(scopes, node)
+	}
+	return err
 }
