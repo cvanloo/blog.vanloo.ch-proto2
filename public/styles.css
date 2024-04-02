@@ -702,6 +702,8 @@ code span.line-number::after {
 		left: auto;
 		float: left;
 		min-width: 100%;
+		min-width: -moz-available;
+		min-width: -webkit-fill-available;
 		display: block;
 		margin: 0.8rem 0;
 		padding: 0.8rem 1.6rem;

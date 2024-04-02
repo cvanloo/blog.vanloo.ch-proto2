@@ -28,6 +28,9 @@ func init() {
 	template.Must(pages.Parse(HtmlLink))
 	template.Must(pages.Parse(HtmlAside))
 	template.Must(pages.Parse(HtmlSidenote))
+	template.Must(pages.Parse(HtmlEnquote))
+	template.Must(pages.Parse(HtmlMono))
+	template.Must(pages.Parse(HtmlEm))
 }
 
 func Render(element Renderable) (template.HTML, error) {
@@ -87,6 +90,10 @@ type (
 	CompositeRenderable interface {
 		Renderable
 		Append(child Renderable)
+	}
+	TextRenderable interface {
+		Renderable
+		Text() string
 	}
 )
 
@@ -375,8 +382,7 @@ func (p *Paragraph) Append(child Renderable) {
 }
 
 const HtmlParagraph = `
-{{ define "Paragraph" }}
-<p>
+{{ define "Paragraph" }}<p>
 {{ range .Content }}
 {{ Render . }}
 {{ end }}
@@ -386,7 +392,7 @@ const HtmlParagraph = `
 
 type Text string
 
-var _ Renderable = (*Text)(nil)
+var _ TextRenderable = (*Text)(nil)
 
 func (t Text) Render() (template.HTML, error) {
 	buf := &bytes.Buffer{}
@@ -394,11 +400,11 @@ func (t Text) Render() (template.HTML, error) {
 	return template.HTML(buf.String()), err
 }
 
-const HtmlText = `
-{{ define "Text" }}
-{{ . }}
-{{ end }}
-`
+func (t Text) Text() string {
+	return string(t)
+}
+
+const HtmlText = `{{ define "Text" }}{{ . }}{{ end }}`
 
 type Link struct {
 	Link string
@@ -456,46 +462,60 @@ func (c Comment) Render() (template.HTML, error) {
 
 type Sidenote struct {
 	ID string
-	ShortText, ExpandedText string
+	ShortText string
+	Expanded []Renderable
 }
 
-var _ Renderable = (*Sidenote)(nil)
+var _ CompositeRenderable = (*Sidenote)(nil)
 
-func NewSidenote(short, full string) Sidenote {
-	return Sidenote{
+func NewSidenote(short string) *Sidenote {
+	return &Sidenote{
 		ID: GenerateID("sn"),
 		ShortText: short,
-		ExpandedText: full,
 	}
 }
 
-func (s Sidenote) Render() (template.HTML, error) {
+func (s *Sidenote) Render() (template.HTML, error) {
 	buf := &bytes.Buffer{}
 	err := pages.Execute(buf, "Sidenote", s)
 	return template.HTML(buf.String()), err
 }
 
+func (s *Sidenote) Append(child Renderable) {
+	s.Expanded = append(s.Expanded, child)
+}
+
+func (s *Sidenote) ExpandedTextOnly() string {
+	text := ""
+	for _, r := range s.Expanded {
+		if str, ok := r.(TextRenderable); ok {
+			text += str.Text()
+		}
+	}
+	return text
+}
+
 // Adapted @from: https://github.com/kslstn/sidenotes
 const HtmlSidenote = `
-{{ define "Sidenote" }}
-<span class="sidenote">
+{{ define "Sidenote" }}<span class="sidenote">
 	<input type="checkbox"
 		   id="sidenote__checkbox--{{.ID}}"
 		   class="sidenote__checkbox"
 		   aria-label="show sidenote" />
 	<label for="sidenote__checkbox--{{.ID}}"
 		   aria-describedby="sidenote-{{.ID}}"
-		   title="{{.ExpandedText}}"
+		   title="{{.ExpandedTextOnly}}"
 		   class="sidenote__button">{{.ShortText}}
 	</label>
 	<small id="sidenote-{{.ID}}"
 		   class="sidenote__content">
 		<span class="sidenote__content-parenthesis">(sidenote:</span>
-		{{.ExpandedText}}
+		{{ range .Expanded }}
+		{{ Render . }}
+		{{ end }}
 		<span class="sidenote__content-parenthesis">)</span>
 	</small>
-</span>
-{{ end }}
+</span>{{ end }}
 `
 
 type CodeLine string
@@ -521,3 +541,63 @@ const HtmlCodeBlock = `
 `
 
 //`<span class="comment">{{ .Comment }}</span>`
+
+type Enquote string
+
+var _ TextRenderable = (*Enquote)(nil)
+
+func (e Enquote) Render() (template.HTML, error) {
+	buf := &bytes.Buffer{}
+	err := pages.Execute(buf, "Enquote", e)
+	return template.HTML(buf.String()), err
+}
+
+func (e Enquote) Text() string {
+	return string(e)
+}
+
+const HtmlEnquote = `
+{{ define "Enquote" }}
+<q>{{ . }}</q>
+{{ end}}
+`
+
+type Mono string
+
+var _ TextRenderable = (*Mono)(nil)
+
+func (m Mono) Render() (template.HTML, error) {
+	buf := &bytes.Buffer{}
+	err := pages.Execute(buf, "Mono", m)
+	return template.HTML(buf.String()), err
+}
+
+func (m Mono) Text() string {
+	return string(m)
+}
+
+const HtmlMono = `
+{{ define "Mono" }}
+<code>{{ . }}</code>
+{{ end }}
+`
+
+type Em string
+
+var _ TextRenderable = (*Em)(nil)
+
+func (e Em) Render() (template.HTML, error) {
+	buf := &bytes.Buffer{}
+	err := pages.Execute(buf, "Em", e)
+	return template.HTML(buf.String()), err
+}
+
+func (e Em) Text() string {
+	return string(e)
+}
+
+const HtmlEm = `
+{{ define "Em" }}
+<em>{{ . }}</em>
+{{ end }}
+`

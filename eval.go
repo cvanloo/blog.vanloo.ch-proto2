@@ -329,8 +329,7 @@ var rootFuns = FunMap {
 		if err != nil {
 			return fmt.Errorf("enquote: %w", err)
 		}
-		// @fixme: implement correctly
-		scopes.Parent().Append(Text(text.Text))
+		scopes.Parent().Append(Enquote(text.Text))
 		return args.Finished()
 	},
 	"sidenote": func(blog *Blog, scopes *Scopes, args *Args) error {
@@ -338,12 +337,18 @@ var rootFuns = FunMap {
 		if err != nil {
 			return fmt.Errorf("sidenote: %w", err)
 		}
-		full, err := args.Next("sidenote content", TypeText)
-		if err != nil {
-			return fmt.Errorf("sidenote: %w", err)
-		}
-		sidenote := NewSidenote(string(short.Text), string(full.Text))
+		sidenote := NewSidenote(string(short.Text))
 		scopes.Parent().Append(sidenote)
+		for !args.IsFinished() {
+			content, err := args.Optional("sidenote content", TypeAny)
+			if err != nil {
+				return fmt.Errorf("sidenote: %w", err)
+			}
+			err = blog.Apply(sidenote, scopes, content)
+			if err != nil {
+				return fmt.Errorf("sidenote: %w", err)
+			}
+		}
 		return args.Finished()
 	},
 	"mono": func(blog *Blog, scopes *Scopes, args *Args) error {
@@ -351,8 +356,7 @@ var rootFuns = FunMap {
 		if err != nil {
 			return fmt.Errorf("mono: %w", err)
 		}
-		// @fixme: implement correctly
-		scopes.Parent().Append(Text(text.Text))
+		scopes.Parent().Append(Mono(text.Text))
 		return args.Finished()
 	},
 	"code": func(blog *Blog, scopes *Scopes, args *Args) error {
@@ -365,6 +369,14 @@ var rootFuns = FunMap {
 			code.Lines = append(code.Lines, CodeLine(line))
 		}
 		scopes.Parent().Append(code)
+		return args.Finished()
+	},
+	"em": func(blog *Blog, scopes *Scopes, args *Args) error {
+		text, err := args.Next("em text", TypeText)
+		if err != nil {
+			return fmt.Errorf("em: %w", err)
+		}
+		scopes.Parent().Append(Em(text.Text))
 		return args.Finished()
 	},
 }

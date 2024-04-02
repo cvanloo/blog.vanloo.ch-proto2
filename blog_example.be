@@ -73,7 +73,7 @@ From there, you can also access notes from the desktop ({sidenote Windows only \
 
 {paragraph
 There is a way around this, if you're technically inclined, that is.
-Since the reMarkable runs on Linux, you can {mono ssh} into it, take your own backups using {mono rsync}, {sidenote possibly \\ I haven't tried that out yet.} even install a Syncthing service on it.
+Since the reMarkable runs on Linux, you can {mono ssh} into it, take your own backups using {mono rsync}, {sidenote possibly \\ I haven't tried that out {em yet}.} even install a Syncthing service on it.
 }
 
 {paragraph
