@@ -515,9 +515,7 @@ func (c CodeBlock) Render() (template.HTML, error) {
 const HtmlCodeBlock = `
 {{ define "CodeBlock" }}
 <pre><code>
-{{ range .Lines }}
-<span class="line-number">{{ .Line }}</span>
-{{ end }}
+{{ range .Lines }} <span class="line-number">{{ . }}</span> {{ end }}
 </pre></code>
 {{ end }}
 `

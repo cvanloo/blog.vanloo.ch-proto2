@@ -313,6 +313,26 @@ var rootFuns = FunMap {
 		}
 		return args.Finished()
 	},
+	"abstract": func(blog *Blog, scopes *Scopes, args *Args) error {
+		// @fixme: implement correctly
+		for !args.IsFinished() {
+			content, err := args.Optional("abstract content", TypeAny)
+			if err != nil {
+				return fmt.Errorf("abstract: %w", err)
+			}
+			_ = content
+		}
+		return args.Finished()
+	},
+	"enquote": func(blog *Blog, scopes *Scopes, args *Args) error {
+		text, err := args.Next("enquote text", TypeText)
+		if err != nil {
+			return fmt.Errorf("enquote: %w", err)
+		}
+		// @fixme: implement correctly
+		scopes.Parent().Append(Text(text.Text))
+		return args.Finished()
+	},
 	"sidenote": func(blog *Blog, scopes *Scopes, args *Args) error {
 		short, err := args.Next("sidenote short text", TypeText)
 		if err != nil {
@@ -324,6 +344,27 @@ var rootFuns = FunMap {
 		}
 		sidenote := NewSidenote(string(short.Text), string(full.Text))
 		scopes.Parent().Append(sidenote)
+		return args.Finished()
+	},
+	"mono": func(blog *Blog, scopes *Scopes, args *Args) error {
+		text, err := args.Next("monospace text", TypeText)
+		if err != nil {
+			return fmt.Errorf("mono: %w", err)
+		}
+		// @fixme: implement correctly
+		scopes.Parent().Append(Text(text.Text))
+		return args.Finished()
+	},
+	"code": func(blog *Blog, scopes *Scopes, args *Args) error {
+		text, err := args.Next("code text", TypeText)
+		if err != nil {
+			return fmt.Errorf("code: %w", err)
+		}
+		var code CodeBlock
+		for _, line := range strings.Split(string(text.Text), "\n") {
+			code.Lines = append(code.Lines, CodeLine(line))
+		}
+		scopes.Parent().Append(code)
 		return args.Finished()
 	},
 }
